@@ -1,6 +1,6 @@
 import re
 
-v = "1.5"
+v = "1.6"
 tab = " " * 4
 newline = "\n"
 
@@ -152,5 +152,60 @@ def approval():
 approval()
 
 
+##=========== allowing sex in public. Props to RonChon. 2 Checks in place to prevent this.
+## Did I do this because darkstel couldn't get over himself? Yep. Is it a bit immature? Yep. Do I feel ashamed? Nope. If you don't want code to change, don't poke a programmer.
+##=========== ./scripts/sex/request.rpy
+#fn='./scripts/sex/request.rpy'
+#cp $fn $fn.orig
+#
+#patt='elif Player.location not in bedrooms and "bg_shower" not in Player.location'
+#repl='elif False and Player.location not in bedrooms and "bg_shower" not in Player.location'
+#
+#perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
+#echo -e "${BGreen}${fn} patched$NC"
+#
+#fn='./scripts/interface/interactions.rpy'
+#cp $fn $fn.orig
+#
+#patt='if approval_check\(Character, threshold = "hookup"\) and len\(Present\) == 1 and Player.location in \[Character.home, Player.home\] and not get_Present\(location = Player.location.replace\("_", "_shower_"\), include_Party = False\)\[0\]'
+#repl='if approval_check(Character, threshold = "hookup") and len(Present) == 1'
+#
+#perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
+#echo -e "${BGreen}${fn} patched$NC"
+
+#=========== ./scripts/mechanics/approval.rpy
+def allowPublicSex():
+    fn="./scripts/sex/request.rpy"
+    with open(fn, "r") as file:
+        fc = file.read()
+
+    #breaks approval limit
+    patt='elif Player.location not in bedrooms and "bg_shower" not in Player.location'
+    repl='elif False and Player.location not in bedrooms and "bg_shower" not in Player.location'
+
+    fc = re.sub(patt, repl, fc, flags=re.M)
+
+    with open(fn, "w") as file:
+        file.write(fc)
+
+    print(f"{fn} patched")
+
+
+    fn="./scripts/interface/interactions.rpy"
+    with open(fn, "r") as file:
+        fc = file.read()
+
+    #breaks approval limit
+    patt='if approval_check\(Character, threshold = "hookup"\) and len\(Present\) == 1 and Player.location in \[Character.home, Player.home\] and not get_Present\(location = Player.location.replace\("_", "_shower_"\), include_Party = False\)\[0\]'
+    repl='if approval_check(Character, threshold = "hookup") and len(Present) == 1'
+
+    fc = re.sub(patt, repl, fc, flags=re.M)
+
+    with open(fn, "w") as file:
+        file.write(fc)
+
+    print(f"{fn} patched")
+
+allowPublicSex()
 
 print(f"    Success! Cheats are now enabled!")
