@@ -138,8 +138,8 @@ REM ----------------------------------------------------------------------------
 REM Clean up
 REM --------------------------------------------------------------------------------
 echo   Cleaning up temporary files...
-REM del "%rpatool%.tmp"
-REM del "%rpatool%"
+del "%rpatool%.tmp"
+del "%rpatool%"
 echo.
 if "%option%" == "2" (
 	goto finish
@@ -163,6 +163,7 @@ REM Create cheat.py
 REM --------------------------------------------------------------------------------
 echo %cheat1%>> "%cheat%.tmp"
 echo %cheat2%>> "%cheat%.tmp"
+echo %cheat3%>> "%cheat%.tmp"
 set "cheatps=%cheat:[=`[%"
 set "cheatps=%cheatps:]=`]%"
 set "cheatps=%cheatps:^=^^%"
