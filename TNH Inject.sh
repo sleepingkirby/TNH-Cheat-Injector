@@ -1,5 +1,5 @@
 #!/bin/bash
-v='1.6'
+v='1.7'
 rpaurl='https://raw.githubusercontent.com/Shizmob/rpatool/master/rpatool'
 
 clear
@@ -215,8 +215,17 @@ perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 echo -e "${BGreen}${fn} patched$NC"
 
+#=========== ./scripts/mechanics/movement.rpy 
+fn='./scripts/mechanics/movement.rpy'
+cp $fn $fn.orig
 
+#character won't wipe off cum when exiting bed room after wearing cum 10 times
+patt='                if temp_Characters\[0\]\.spunk\[locations\[0\]\]'
+repl='                if temp_Characters[0].History.check("wear_cum") < 10 and temp_Characters[0].spunk[locations[0]]'
 
+perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
+
+echo -e "${BGreen}${fn} patched$NC"
 
 #=========== ./scripts/interface/quick_menu.rpy 
 fn='./scripts/interface/quick_menu.rpy' 
