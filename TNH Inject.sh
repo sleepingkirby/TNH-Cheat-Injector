@@ -197,15 +197,22 @@ patt='elif Player.location not in bedrooms and "bg_shower" not in Player.locatio
 repl='elif False and Player.location not in bedrooms and "bg_shower" not in Player.location'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
+
+patt='    elif len\(Present\) > 1:'
+repl='    elif False and len(Present) > 1:'
+
+perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
+
 echo -e "${BGreen}${fn} patched$NC"
 
 fn='./scripts/interface/interactions.rpy'
 cp $fn $fn.orig
 
 patt='if approval_check\(Character, threshold = "hookup"\) and len\(Present\) == 1 and Player.location in \[Character.home, Player.home\] and not get_Present\(location = Player.location.replace\("_", "_shower_"\), include_Party = False\)\[0\]'
-repl='if approval_check(Character, threshold = "hookup") and len(Present) == 1'
+repl='if approval_check(Character, threshold = "hookup") and len(Present) >= 1'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
+
 echo -e "${BGreen}${fn} patched$NC"
 
 
