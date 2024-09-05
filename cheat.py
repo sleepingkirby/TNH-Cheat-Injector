@@ -1,6 +1,6 @@
 import re
 
-v = "1.6"
+v = "1.7"
 tab = " " * 4
 newline = "\n"
 
@@ -161,12 +161,13 @@ def allowPublicSex():
     with open(fn, "r") as file:
         fc = file.read()
 
-    #breaks approval limit
+    #skips bedroom check for place to have sex
     patt='elif Player.location not in bedrooms and "bg_shower" not in Player.location'
     repl='elif False and Player.location not in bedrooms and "bg_shower" not in Player.location'
 
     fc = re.sub(patt, repl, fc, flags=re.M)
 
+    #skips people around check
     patt='    elif len\(Present\) > 1:'
     repl='    elif False and len(Present) > 1:'
 
@@ -182,7 +183,7 @@ def allowPublicSex():
     with open(fn, "r") as file:
         fc = file.read()
 
-    #breaks approval limit
+    #sips bedroom checks and number of people checks for place to have sex GUI
     patt='if approval_check\(Character, threshold = "hookup"\) and len\(Present\) == 1 and Player.location in \[Character.home, Player.home\] and not get_Present\(location = Player.location.replace\("_", "_shower_"\), include_Party = False\)\[0\]'
     repl='if approval_check(Character, threshold = "hookup") and len(Present) >= 1'
 
@@ -194,5 +195,27 @@ def allowPublicSex():
     print(f"{fn} patched")
 
 allowPublicSex()
+
+
+#=========== ./scripts/mechanics/movement.rpy
+def movement():
+    fn="./scripts/mechanics/movement.rpy"
+    with open(fn, "r") as file:
+        fc = file.read()
+
+    #character won't wipe off cum when exiting bed room after wearing cum 10 times
+    patt='                if temp_Characters\[0\]\.spunk\[locations\[0\]\]'
+    repl='                if temp_Characters[0].History.check("wear_cum") < 10 and temp_Characters[0].spunk[locations[0]]'
+
+    fc = re.sub(patt, repl, fc, flags=re.M)
+
+    with open(fn, "w") as file:
+        file.write(fc)
+
+    print(f"{fn} patched")
+
+movement()
+
+
 
 print(f"    Success! Cheats are now enabled!")
