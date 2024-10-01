@@ -20,7 +20,7 @@ set cheat3=ICBhY3Rpb24gU2V0VmFyaWFibGUoIlBsYXllci5zdGFtaW5hIiwgUGxheWVyLm1heF9zd
 REM --------------------------------------------------------------------------------
 REM !! DO NOT EDIT BELOW THIS LINE !!
 REM --------------------------------------------------------------------------------
-set "v=1.8"
+set "v=1.9beta"
 title TNH Inject v%v%
 :init
 REM --------------------------------------------------------------------------------

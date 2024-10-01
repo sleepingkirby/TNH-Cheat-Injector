@@ -1,6 +1,6 @@
 import re
 
-v = "1.8"
+v = "1.9beta"
 tab = " " * 4
 newline = "\n"
 
@@ -10,8 +10,8 @@ def main_menu():
     with open(fn, "r") as file:
         fc = file.read()
 
-    patt='    text f"\{config.version\}" anchor \(1.0, 0.5\) pos \(0.157, 0.96\):[\r\n]+ +size 25'
-    repl='    text f"{config.version}" anchor (1.0, 0.5) pos (0.157, 0.96):\n        size 25\n    frame:\n        xalign .5\n        yalign 0\n        text("Cheats enabled!")'
+    patt='    text "\[config.version\]" anchor \(1.0, 0.5\) pos \(0.157, 0.96\):[\r\n]+ +size 25'
+    repl='    text "[config.version]" anchor (1.0, 0.5) pos (0.157, 0.96):\n        size 25\n    frame:\n        xalign .5\n        yalign 0\n        text("Cheats enabled!")'
 
     fc = re.sub(patt, repl, fc, flags=re.M)
 
@@ -46,7 +46,7 @@ def config():
     with open(fn, "r") as file:
         fc = file.read()
 
-    fc = fc.replace('config.developer = "auto"', 'config.developer = "auto"\n    config.console = True')
+    fc = fc.replace('config.developer = "auto"', 'config.developer = "auto"\ndefine config.console = True')
 
     with open(fn, "w") as file:
         file.write(fc)
@@ -65,12 +65,35 @@ def utilities():
     repl='    def removeCheating(C):\r\n        C.History.remove("cheated_on_flirting_in_public")\r\n        C.History.remove("cheated_on_date")\r\n        C.History.remove("cheated_on_relationship")\r\n        if C.History.permanent.get("cheated_on_flirting_in_public"):\r\n            del C.History.permanent["cheated_on_flirting_in_public"]\r\n        if C.History.permanent.get("cheated_on_date"):\r\n            del C.History.permanent["cheated_on_date"]\r\n        if C.History.permanent.get("cheated_on_relationship"):\r\n            del C.History.permanent["cheated_on_relationship"]\r\n           \r\n        for other_C in all_Companions:\r\n            Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public")\r\n            Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_date")\r\n            Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_relationship")\r\n            if Player.History.permanent.get(f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public"):\r\n                del Player.History.permanent[f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public"]\r\n            if Player.History.permanent.get(f"cheated_on_{C.tag}_with_{other_C.tag}_date"):\r\n                del Player.History.permanent[f"cheated_on_{C.tag}_with_{other_C.tag}_date"]\r\n            if Player.History.permanent.get(f"cheated_on_{C.tag}_with_{other_C.tag}_relationship"):\r\n                del Player.History.permanent[f"cheated_on_{C.tag}_with_{other_C.tag}_relationship"]\r\n        return\r\n\r\n\g<tabs>def unique(original):'
     fc = re.sub(patt, repl, fc, flags=re.M)
 
+    patt='(?P<tabs> +)def unique\(original\):'
+    repl='\g<tabs>def addAbilityPoints(p):\r\n        if not hasattr(Player, "ability_points"):\r\n            Player.ability_points = 0\r\n        if p > 0:\r\n            Player.ability_points += p\r\n\r\n\g<tabs>def unique(original):'
+
+    fc = re.sub(patt, repl, fc, flags=re.M)
+
     with open(fn, "w") as file:
         file.write(fc)
 
     print(f"{fn} patched")
 
 utilities()
+
+#=========== ./scripts/base/player.rpy
+def basePlayer():
+    fn="./scripts/base/player.rpy"
+    with open(fn, "r") as file:
+        fc = file.read()
+    
+    patt='(?P<tabs> +)points -= abilities\[ability\]\["cost"\]'
+    repl='\g<tabs>points -= abilities[ability]["cost"]\r\n\r\n            if hasattr(self, "ability_points"):\r\n                points += self.ability_points'
+    
+    fc = re.sub(patt, repl, fc, flags=re.M)
+
+    with open(fn, "w") as file:
+        file.write(fc)
+
+    print(f"{fn} patched")
+
+basePlayer()
 
 
 #=============  ./scripts/interface/Player_menu.rpy =========
@@ -80,37 +103,38 @@ def player_menu():
         fc = file.read()
 
     #turns text cash number into textbutton
-    patt='    text f"\$ \{Player\.cash\}" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)):[\r\n]+        size (?P<size>[0-9]+)'
-    repl='    textbutton "{size=\g<size>}" + f"$ {Player.cash}" \g<pos>:\n        action SetVariable("Player.cash", Player.cash + 50000)'
+    patt='    text "\$\[Player\.cash\]" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)):[\r\n]+        size (?P<size>[0-9]+)'
+    repl='    textbutton "{size=\g<size>}" + "$[Player.cash]" \g<pos>:\r\n        action SetVariable("Player.cash", Player.cash + 50000)'
     fc = re.sub(patt, repl, fc, flags=re.M)
 
     #turns text for ability points into text button
-    patt='    text f"\{Player.ability_points\}" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)):[\r\n]+        font "(?P<font>[a-zA-Z_]+\.[a-zA-Z]{3,6})"[ \r\n]+        size (?P<size>[0-9]+)'
-    repl='    textbutton "{size=\g<size>}{font=\g<font>}" + f"{Player.ability_points}" \g<pos>:\n        action SetVariable("Player.ability_points", Player.ability_points + 5)'
+    patt='    text "\[Player.skill_points\]" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)):[\r\n]+        font "(?P<font>[a-zA-Z_]+\.[a-zA-Z]{3,6})"[ \r\n]+        size (?P<size>[0-9]+)'
+    repl='    textbutton "{size=\g<size>}{font=\g<font>}" + "[Player.ability_points]" \g<pos>:\n        action Function(addAbilityPoints, 5)' 
     fc = re.sub(patt, repl, fc, flags=re.M)
 
     #allows for draggable player xp bar
-    patt='value Player.XP'
-    repl='value FieldValue(Player, "XP", Player.XP_goal)'
+    patt='value \(Player\.XP - Player\.XP_goal\/1\.75\) range \(Player\.XP_goal - Player\.XP_goal\/1\.75\)'
+    repl='value FieldValue(Player, "XP", Player.XP_goal) range (Player.XP_goal)'
     fc = re.sub(patt, repl, fc, flags=re.M)
 
     #turns text for both love and trust into textbuttons
-    patt='(?P<tabs1> +)text f"\{current_relationships_Entry\.(?P<lt>love|trust)\}"(?P<pos> anchor \([0-9.]+, [0-9.]+\) pos \(0\.[0-9]+, 0\.[0-9]+\)):[ \r\n]+font "(?P<font>[a-zA-Z_]+\.[a-zA-Z]{3,6})"[ \r\n]+size (?P<size>[0-9]+)[ \r\n]+color "[a-z0-9#]+"'
-    repl='\g<tabs1>textbutton "{size=\g<size>}{font=\g<font>}" + f"{current_relationships_Entry.\g<lt>}"\g<pos>:\n\g<tabs1>    action SetVariable("current_relationships_Entry.\g<lt>", current_relationships_Entry.\g<lt> + 100)'
-    fc = re.sub(patt, repl, fc, flags=re.M)
-    
-    #turn emotion icons into buttons to turn off said status
-    patt='(?P<tabs1> +)add (?P<f>f?)"images/interface/Player_menu/relationships_(?P<status>mad|horny|nympho|\{status\})\.webp" zoom interface_adjustment'
-    repl='\g<tabs1>imagebutton idle \g<f>"images/interface/Player_menu/relationships_\g<status>.webp" action SetDict(current_relationships_Entry.status, \g<f>"\g<status>", 0)'
+    patt='(?P<tabs1> +)text "\[current_relationships_Entry\.(?P<lt>love|trust)\]"(?P<pos> anchor \([0-9.]+, [0-9.]+\) pos \(0\.[0-9]+, 0\.[0-9]+\)):[ \r\n]+font "(?P<font>[a-zA-Z_]+\.[a-zA-Z]{3,6})"[ \r\n]+size (?P<size>[0-9]+)[ \r\n]+color "[a-z0-9#]+"'
+    repl='\g<tabs1>textbutton "{size=\g<size>}{font=\g<font>}" + "[current_relationships_Entry.\g<lt>]"\g<pos>:\n\g<tabs1>    action SetVariable("current_relationships_Entry.\g<lt>", current_relationships_Entry.\g<lt> + 100)'
     fc = re.sub(patt, repl, fc, flags=re.M)
    
+    #turn emotion icons into buttons to turn off said status
+    patt='(?P<tabs1> +)add (?P<f>f?)"images/interface/Player_menu/relationships_(?P<status>mad|horny|nympho|\[status\])\.webp" zoom high_resolution_interface_adjustment'
+    repl='\g<tabs1>imagebutton idle \g<f>"images/interface/Player_menu/relationships_\g<status>.webp" action SetDict(current_relationships_Entry.status, \g<f>"\g<status>", 0)'
+    repl='\g<tabs1>imagebutton idle \g<f>"images/interface/Player_menu/relationships_\g<status>.webp":\r\n\g<tabs1>    at transform:\r\n\g<tabs1>        zoom high_resolution_interface_adjustment\r\n\g<tabs1>    action SetDict(current_relationships_Entry.status, \g<f>"\g<status>", 0)'
+    fc = re.sub(patt, repl, fc, flags=re.M)
+
     #adding button that allows for removal of cheating
     patt='        text "RELATIONSHIP STATUS" anchor \(0\.0, 0\.5\) pos \(0\.495, 0\.398\):[\r\n]+            font "agency_fb\.ttf"[\r\n]+[\r\n]+            size (?P<size>28)'
     repl='        textbutton "{size=28}{font=agency_fb.ttf} RELATIONSHIP STATUS" anchor (0.0, 0.5) pos (0.495, 0.398):\r\n            action Function(removeCheating, current_relationships_Entry)'
     fc = re.sub(patt, repl, fc, flags=re.M)
- 
+
     #friendship is the best thing ever! (allows for clicking on friendship to increase it by 50)
-    patt='(?P<tabs> +)add f"images/interface/photos/\{C\}\.webp" align (?P<algn>\([a-z0-9,. ]+\)) zoom (?P<zoom>0\.[0-9]+)'
+    patt='(?P<tabs> +)add "images/interface/photos/\[C\]\.webp" align (?P<algn>\([a-z0-9,. ]+\)) zoom (?P<zoom>0\.[0-9]+)'
     repl='\g<tabs>imagebutton idle f"images/interface/photos/{C}.webp" align \g<algn>:\n\g<tabs>    at transform:\n\g<tabs>        zoom 0.13\r\n\g<tabs>    action SetDict(current_relationships_Entry.friendship, f"{C}", current_relationships_Entry.friendship[C] + 50)'
     fc = re.sub(patt, repl, fc, flags=re.M)
 
@@ -130,12 +154,12 @@ def actions():
         fc = file.read()
 
     #sets text stamina into textbutton
-    patt='        text f"\{Player.stamina\}" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)):[ \r\n]+            size (?P<size>[0-9]+)'
-    repl='        textbutton "{size=\g<size>}" + f"{Player.stamina}" \g<pos>:\n            action SetVariable("Player.stamina", Player.max_stamina + Player.stamina)'
+    patt='        text "\[Player.stamina\]" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)):[ \r\n]+            size (?P<size>[0-9]+)'
+    repl='        textbutton "{size=\g<size>}" + "[Player.stamina]" \g<pos>:\n            action SetVariable("Player.stamina", Player.max_stamina + Player.stamina)'
     fc = re.sub(patt, repl, fc, flags=re.M)
 
-    patt='        text f"\{Character.stamina\}" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)):[ \r\n]+            size (?P<size>[0-9]+)'
-    repl='        textbutton "{size=\g<size>}" + f"{Character.stamina}" \g<pos>:\n            action SetVariable("focused_Character.stamina", focused_Character.max_stamina + Character.stamina)'
+    patt='        text "\[Character.stamina\]" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)):[ \r\n]+            size (?P<size>[0-9]+)'
+    repl='        textbutton "{size=\g<size>}" + "[Character.stamina]" \g<pos>:\n            action SetVariable("focused_Character.stamina", focused_Character.max_stamina + Character.stamina)'
     fc = re.sub(patt, repl, fc, flags=re.M)
 
     #sets player and character desire values into field values, aka, interactable sliding bars
@@ -190,6 +214,7 @@ def allowPublicSex():
 
     fc = re.sub(patt, repl, fc, flags=re.M)
 
+
     #skips people around check
     patt='    elif len\(Present\) > 1:'
     repl='    elif False and len(Present) > 1:'
@@ -206,8 +231,8 @@ def allowPublicSex():
     with open(fn, "r") as file:
         fc = file.read()
 
-    #sips bedroom checks and number of people checks for place to have sex GUI
-    patt='if approval_check\(Character, threshold = "hookup"\) and len\(Present\) == 1 and Player.location in \[Character.home, Player.home\] and not get_Present\(location = Player.location.replace\("_", "_shower_"\), include_Party = False\)\[0\]'
+    #skips bedroom checks and number of people checks for place to have sex GUI
+    patt='if approval_check\(Character, threshold = "hookup"\) and len\(Present\) == 1 and Player.location in \[Character.home, Player.home\] and not get_Present\(location = Player.location.replace\("_", "_shower_"\)\)\[0\]'
     repl='if approval_check(Character, threshold = "hookup") and len(Present) >= 1'
 
     fc = re.sub(patt, repl, fc, flags=re.M)
@@ -227,8 +252,8 @@ def movement():
         fc = file.read()
 
     #character won't wipe off cum when exiting bed room after wearing cum 10 times
-    patt='                if temp_Characters\[0\]\.spunk\[locations\[0\]\]'
-    repl='                if temp_Characters[0].History.check("wear_cum") < 10 and temp_Characters[0].spunk[locations[0]]'
+    patt='                if temp_Characters\[0\]\.spunk\[location\]'
+    repl='                if temp_Characters[0].History.check("wear_cum") < 10 and temp_Characters[0].spunk[location]'
 
     fc = re.sub(patt, repl, fc, flags=re.M)
 

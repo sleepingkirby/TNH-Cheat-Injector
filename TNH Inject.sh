@@ -239,11 +239,13 @@ echo -e "${BGreen}${fn} patched$NC"
 fn='./scripts/sex/request.rpy'
 cp $fn $fn.orig
 
+#skips bedroom check for place to have sex
 patt='elif Player.location not in bedrooms and "bg_shower" not in Player.location'
 repl='elif False and Player.location not in bedrooms and "bg_shower" not in Player.location'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
+#skips people around check
 patt='    elif len\(Present\) > 1:'
 repl='    elif False and len(Present) > 1:'
 
@@ -254,6 +256,7 @@ echo -e "${BGreen}${fn} patched$NC"
 fn='./scripts/interface/interactions.rpy'
 cp $fn $fn.orig
 
+#skips bedroom checks and number of people checks for place to have sex GUI
 patt='if approval_check\(Character, threshold = "hookup"\) and len\(Present\) == 1 and Player.location in \[Character.home, Player.home\] and not get_Present\(location = Player.location.replace\("_", "_shower_"\)\)\[0\]'
 repl='if approval_check(Character, threshold = "hookup") and len(Present) >= 1'
 
