@@ -1,5 +1,5 @@
 #!/bin/bash
-v='1.7'
+v='1.9'
 rpaurl='https://raw.githubusercontent.com/Shizmob/rpatool/master/rpatool'
 
 clear
@@ -83,7 +83,7 @@ perlP=`which perl`
 #============= config.rpy =========
 fn='./scripts/base/config.rpy'
 cp $fn $fn.orig
-perl -i -pe 's/config.developer = "auto"/config.developer = "auto"\n    config.console = True/' $fn
+perl -i -pe 's/config.developer = "auto"/config.developer = "auto"\ndefine config.console = True/' $fn
 
 echo -e "${BGreen}${fn} patched$NC"
 
@@ -105,42 +105,74 @@ echo -e "${BGreen}${fn} patched$NC"
 #
 #echo -e "${BGreen}${fn} patched$NC"
 
+#=========== ./scripts/mechanics/utilities.rpy
+fn='./scripts/mechanics/utilities.rpy'
+cp $fn $fn.orig
+
+
+# setup for removing cheating flags
+patt='(?P<tabs> +)def unique\(original\):'
+repl='    def removeCheating(C):\r\n        C.History.remove("cheated_on_flirting_in_public")\r\n        C.History.remove("cheated_on_date")\r\n        C.History.remove("cheated_on_relationship")\r\n        if C.History.permanent.get("cheated_on_flirting_in_public"):\r\n            del C.History.permanent["cheated_on_flirting_in_public"]\r\n        if C.History.permanent.get("cheated_on_date"):\r\n            del C.History.permanent["cheated_on_date"]\r\n        if C.History.permanent.get("cheated_on_relationship"):\r\n            del C.History.permanent["cheated_on_relationship"]\r\n           \r\n        for other_C in all_Companions:\r\n            Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public")\r\n            Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_date")\r\n            Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_relationship")\r\n            if Player.History.permanent.get(f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public"):\r\n                del Player.History.permanent[f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public"]\r\n            if Player.History.permanent.get(f"cheated_on_{C.tag}_with_{other_C.tag}_date"):\r\n                del Player.History.permanent[f"cheated_on_{C.tag}_with_{other_C.tag}_date"]\r\n            if Player.History.permanent.get(f"cheated_on_{C.tag}_with_{other_C.tag}_relationship"):\r\n                del Player.History.permanent[f"cheated_on_{C.tag}_with_{other_C.tag}_relationship"]\r\n        return\r\n\r\n$+{tabs}def unique(original):'
+
+perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
+
+echo -e "${BGreen}${fn} patched$NC"
+
+
+
 #=========== ./scripts/interface/Player_menu.rpy
 fn='./scripts/interface/Player_menu.rpy'
 cp $fn $fn.orig
 
 #turns text cash number into textbutton
-patt='    text f"\$ \{Player\.cash\}" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)):[\r\n]+        size (?P<size>[0-9]+)'
-repl='    textbutton "{size=$+{size}}" + f"\$ {Player.cash}" $+{pos}:\r\n        action SetVariable("Player.cash", Player.cash + 50000)'
+patt='    text "\$\[Player\.cash\]" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)):[\r\n]+        size (?P<size>[0-9]+)'
+repl='    textbutton "{size=$+{size}}" + "\$[Player.cash]" $+{pos}:\r\n        action SetVariable("Player.cash", Player.cash + 50000)'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 #turns text for ability points into text button
-patt='    text f"\{Player.ability_points\}" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)):[\r\n]+        font "(?P<font>[a-zA-Z_]+\.[a-zA-Z]{3,6})"[ \r\n]+        size (?P<size>[0-9]+)'
-repl='    textbutton "{size=$+{size}}{font=$+{font}}" + f"{Player.ability_points}" $+{pos}:\r\n        action SetVariable("Player.ability_points", Player.ability_points + 5)'
-
-perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
+#note: as of 0.6a, ability_points was renamed to skill_points and how it works has completely changed. skill_points is NOT a variable/value, but a functional calculation of player levels
+#As such, this is no longer needed. Allowing for someone to modify player levels instead.
+#patt='    text "\[Player.skill_points\]" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)):[\r\n]+        font "(?P<font>[a-zA-Z_]+\.[a-zA-Z]{3,6})"[ \r\n]+        size (?P<size>[0-9]+)'
+#repl='    textbutton "{size=$+{size}}{font=$+{font}}" + "[Player.skill_points]" $+{pos}:\r\n        action SetVariable("Player.skill_points", Player.skill_points + 5)'
+#
+#perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 #allows for draggable player xp bar
-patt='value Player.XP'
-repl='value FieldValue(Player, "XP", Player.XP_goal)'
+#        bar value (Player.XP - Player.XP_goal/1.75) range (Player.XP_goal - Player.XP_goal/1.75) anchor (1.0, 0.5) pos (0.921, 0.29) xysize (int(277*game_resolution), int(24*game_resolution)):
+
+
+#if I need to break level cap, it's here
+#./scripts/mechanics/progression.rpy
+#define max_level = [15, 15, 15, 20, 25, 30]
+#        bar value (Player.XP - Player.XP_goal/1.75) range (Player.XP_goal - Player.XP_goal/1.75) anchor (1.0, 0.5) pos (0.921, 0.29) xysize (int(277*game_resolution), int(24*game_resolution)):          
+patt='value \(Player\.XP - Player\.XP_goal\/1\.75\) range \(Player\.XP_goal - Player\.XP_goal\/1\.75\)'
+repl='value FieldValue(Player, "XP", Player.XP_goal) range (Player.XP_goal)'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 #turns text for both love and trust into textbuttons
-patt='(?P<tabs1> +)text f"\{current_relationships_Entry\.(?P<lt>love|trust)\}"(?P<pos> anchor \([0-9.]+, [0-9.]+\) pos \(0\.[0-9]+, 0\.[0-9]+\)):[ \r\n]+font "(?P<font>[a-zA-Z_]+\.[a-zA-Z]{3,6})"[ \r\n]+size (?P<size>[0-9]+)[ \r\n]+color "[a-z0-9#]+"'
-repl='$+{tabs1}textbutton "{size=$+{size}}{font=$+{font}}" + f"{current_relationships_Entry.$+{lt}}"$+{pos}:\r\n$+{tabs1}    action SetVariable("current_relationships_Entry.$+{lt}", current_relationships_Entry.$+{lt} + 100)'
+patt='(?P<tabs1> +)text "\[current_relationships_Entry\.(?P<lt>love|trust)\]"(?P<pos> anchor \([0-9.]+, [0-9.]+\) pos \(0\.[0-9]+, 0\.[0-9]+\)):[ \r\n]+font "(?P<font>[a-zA-Z_]+\.[a-zA-Z]{3,6})"[ \r\n]+size (?P<size>[0-9]+)[ \r\n]+color "[a-z0-9#]+"'
+repl='$+{tabs1}textbutton "{size=$+{size}}{font=$+{font}}" + "[current_relationships_Entry.$+{lt}]"$+{pos}:\r\n$+{tabs1}    action SetVariable("current_relationships_Entry.$+{lt}", current_relationships_Entry.$+{lt} + 100)'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 #turn emotion icons into buttons to turn off said status
-patt='(?P<tabs1> +)add (?P<f>f?)"images\/interface\/Player_menu\/relationships_(?P<status>mad|horny|nympho|\{status\})\.webp" zoom interface_adjustment'
-repl='$+{tabs1}imagebutton idle $+{f}"images\/interface\/Player_menu\/relationships_$+{status}.webp" action SetDict(current_relationships_Entry.status, $+{f}"$+{status}", 0)'
+patt='(?P<tabs1> +)add (?P<f>f?)"images\/interface\/Player_menu\/relationships_(?P<status>mad|horny|nympho|\[status\])\.webp" zoom high_resolution_interface_adjustment'
+repl='$+{tabs1}imagebutton idle $+{f}"images\/interface\/Player_menu\/relationships_$+{status}.webp":\r\n$+{tabs1}    at transform:\r\n$+{tabs1}        zoom high_resolution_interface_adjustment\r\n$+{tabs1}    action SetDict(current_relationships_Entry.status, $+{f}"$+{status}", 0)'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
+#adding button that allows for removal of cheating
+patt='        text "RELATIONSHIP STATUS" anchor \(0\.0, 0\.5\) pos \(0\.495, 0\.398\):[\r\n]+            font "agency_fb\.ttf"[\r\n]+[\r\n]+            size 28'
+repl='        textbutton "{size=28}{font=agency_fb.ttf} RELATIONSHIP STATUS" anchor (0.0, 0.5) pos (0.495, 0.398):\r\n            action Function(removeCheating, current_relationships_Entry)'
+
+perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
+
+
 #friendship is the best thing ever! (allows for clicking on friendship to increase it by 50)
-patt='(?P<tabs> +)add f"images\/interface\/photos\/\{C\}\.webp" align (?<align>\([0-9., ]+\)) zoom (?P<zoom>0\.[0-9]+)'
+#                            add "images/interface/photos/[C].webp" align (0.5, 0.5) zoom 0.13
+patt='(?P<tabs> +)add "images\/interface\/photos\/\[C\]\.webp" align (?<align>\([0-9., ]+\)) zoom (?P<zoom>0\.[0-9]+)'
 repl='$+{tabs}imagebutton idle f"images\/interface\/photos\/{C}.webp" align $+{align}:\r\n$+{tabs}    at transform:\r\n$+{tabs}        zoom 0.13\r\n$+{tabs}    action SetDict(current_relationships_Entry.friendship, f"{C}", current_relationships_Entry.friendship[C] + 50)'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
@@ -153,13 +185,13 @@ fn='./scripts/interface/actions.rpy'
 cp $fn $fn.orig
 
 #sets text stamina into textbutton
-patt='        text f"\{Player.stamina\}" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)):[ \r\n]+            size (?P<size>[0-9]+)'
-repl='        textbutton "{size=$+{size}}" + f"{Player.stamina}" $+{pos}:\r\n            action SetVariable("Player.stamina", Player.max_stamina + Player.stamina)'
+patt='        text "\[Player.stamina\]" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)):[ \r\n]+            size (?P<size>[0-9]+)'
+repl='        textbutton "{size=$+{size}}" + "[Player.stamina]" $+{pos}:\r\n            action SetVariable("Player.stamina", Player.max_stamina + Player.stamina)'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
-patt='        text f"\{Character.stamina\}" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)):[ \r\n]+            size (?P<size>[0-9]+)'
-repl='        textbutton "{size=$+{size}}" + f"{Character.stamina}" $+{pos}:\n            action SetVariable("focused_Character.stamina", focused_Character.max_stamina + Character.stamina)'
+patt='        text "\[Character.stamina\]" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)):[ \r\n]+            size (?P<size>[0-9]+)'
+repl='        textbutton "{size=$+{size}}" + "[Character.stamina]" $+{pos}:\n            action SetVariable("focused_Character.stamina", focused_Character.max_stamina + Character.stamina)'
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 
@@ -208,7 +240,7 @@ echo -e "${BGreen}${fn} patched$NC"
 fn='./scripts/interface/interactions.rpy'
 cp $fn $fn.orig
 
-patt='if approval_check\(Character, threshold = "hookup"\) and len\(Present\) == 1 and Player.location in \[Character.home, Player.home\] and not get_Present\(location = Player.location.replace\("_", "_shower_"\), include_Party = False\)\[0\]'
+patt='if approval_check\(Character, threshold = "hookup"\) and len\(Present\) == 1 and Player.location in \[Character.home, Player.home\] and not get_Present\(location = Player.location.replace\("_", "_shower_"\)\)\[0\]'
 repl='if approval_check(Character, threshold = "hookup") and len(Present) >= 1'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
@@ -220,8 +252,8 @@ fn='./scripts/mechanics/movement.rpy'
 cp $fn $fn.orig
 
 #character won't wipe off cum when exiting bed room after wearing cum 10 times
-patt='                if temp_Characters\[0\]\.spunk\[locations\[0\]\]'
-repl='                if temp_Characters[0].History.check("wear_cum") < 10 and temp_Characters[0].spunk[locations[0]]'
+patt='                if temp_Characters\[0\]\.spunk\[location\]'
+repl='                if temp_Characters[0].History.check("wear_cum") < 10 and temp_Characters[0].spunk[location]'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
@@ -244,8 +276,8 @@ fn='./scripts/interface/main_menu.rpy'
 cp $fn $fn.orig
 
 #writes into main menu that cheat is on
-patt='    text f"\{config.version\}" anchor \(1.0, 0.5\) pos \(0.157, 0.96\):\r\n        size 25'
-repl='    text f"{config.version}" anchor (1.0, 0.5) pos (0.157, 0.96):\r\n        size 25\r\n    frame:\r\n        xalign .5\r\n        yalign 0\r\n        text("Cheats enabled!")'
+patt='    text "\[config.version\]" anchor \(1.0, 0.5\) pos \(0.157, 0.96\):\r\n        size 25'
+repl='    text "[config.version]" anchor (1.0, 0.5) pos (0.157, 0.96):\r\n        size 25\r\n    frame:\r\n        xalign .5\r\n        yalign 0\r\n        text("Cheats enabled!")'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 echo -e "${BGreen}${fn} patched$NC"

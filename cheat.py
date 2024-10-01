@@ -1,6 +1,6 @@
 import re
 
-v = "1.7"
+v = "1.8"
 tab = " " * 4
 newline = "\n"
 
@@ -55,6 +55,24 @@ def config():
 
 config()
 
+#=============  ./scripts/mechanics/utilities.rpy =========
+def utilities():
+    fn="./scripts/mechanics/utilities.rpy"
+    with open(fn, "r") as file:
+        fc = file.read()
+
+    patt='(?P<tabs> +)def unique\(original\):'
+    repl='    def removeCheating(C):\r\n        C.History.remove("cheated_on_flirting_in_public")\r\n        C.History.remove("cheated_on_date")\r\n        C.History.remove("cheated_on_relationship")\r\n        if C.History.permanent.get("cheated_on_flirting_in_public"):\r\n            del C.History.permanent["cheated_on_flirting_in_public"]\r\n        if C.History.permanent.get("cheated_on_date"):\r\n            del C.History.permanent["cheated_on_date"]\r\n        if C.History.permanent.get("cheated_on_relationship"):\r\n            del C.History.permanent["cheated_on_relationship"]\r\n           \r\n        for other_C in all_Companions:\r\n            Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public")\r\n            Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_date")\r\n            Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_relationship")\r\n            if Player.History.permanent.get(f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public"):\r\n                del Player.History.permanent[f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public"]\r\n            if Player.History.permanent.get(f"cheated_on_{C.tag}_with_{other_C.tag}_date"):\r\n                del Player.History.permanent[f"cheated_on_{C.tag}_with_{other_C.tag}_date"]\r\n            if Player.History.permanent.get(f"cheated_on_{C.tag}_with_{other_C.tag}_relationship"):\r\n                del Player.History.permanent[f"cheated_on_{C.tag}_with_{other_C.tag}_relationship"]\r\n        return\r\n\r\n\g<tabs>def unique(original):'
+    fc = re.sub(patt, repl, fc, flags=re.M)
+
+    with open(fn, "w") as file:
+        file.write(fc)
+
+    print(f"{fn} patched")
+
+utilities()
+
+
 #=============  ./scripts/interface/Player_menu.rpy =========
 def player_menu():
     fn="./scripts/interface/Player_menu.rpy"
@@ -85,7 +103,12 @@ def player_menu():
     patt='(?P<tabs1> +)add (?P<f>f?)"images/interface/Player_menu/relationships_(?P<status>mad|horny|nympho|\{status\})\.webp" zoom interface_adjustment'
     repl='\g<tabs1>imagebutton idle \g<f>"images/interface/Player_menu/relationships_\g<status>.webp" action SetDict(current_relationships_Entry.status, \g<f>"\g<status>", 0)'
     fc = re.sub(patt, repl, fc, flags=re.M)
-    
+   
+    #adding button that allows for removal of cheating
+    patt='        text "RELATIONSHIP STATUS" anchor \(0\.0, 0\.5\) pos \(0\.495, 0\.398\):[\r\n]+            font "agency_fb\.ttf"[\r\n]+[\r\n]+            size (?P<size>28)'
+    repl='        textbutton "{size=28}{font=agency_fb.ttf} RELATIONSHIP STATUS" anchor (0.0, 0.5) pos (0.495, 0.398):\r\n            action Function(removeCheating, current_relationships_Entry)'
+    fc = re.sub(patt, repl, fc, flags=re.M)
+ 
     #friendship is the best thing ever! (allows for clicking on friendship to increase it by 50)
     patt='(?P<tabs> +)add f"images/interface/photos/\{C\}\.webp" align (?P<algn>\([a-z0-9,. ]+\)) zoom (?P<zoom>0\.[0-9]+)'
     repl='\g<tabs>imagebutton idle f"images/interface/photos/{C}.webp" align \g<algn>:\n\g<tabs>    at transform:\n\g<tabs>        zoom 0.13\r\n\g<tabs>    action SetDict(current_relationships_Entry.friendship, f"{C}", current_relationships_Entry.friendship[C] + 50)'
