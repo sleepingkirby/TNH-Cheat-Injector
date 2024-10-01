@@ -116,9 +116,25 @@ repl='    def removeCheating(C):\r\n        C.History.remove("cheated_on_flirtin
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
+
+patt='(?P<tabs> +)def unique\(original\):'
+repl='$+{tabs}def addAbilityPoints(p):\r\n        if not hasattr(Player, "ability_points"):\r\n            Player.ability_points = 0\r\n        if p > 0:\r\n            Player.ability_points += p\r\n\r\n$+{tabs}def unique(original):'
+
+perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
+
 echo -e "${BGreen}${fn} patched$NC"
 
 
+#=========== ./scripts/base/player.rpy 
+fn='./scripts/base/player.rpy'
+cp $fn $fn.orig
+
+patt='(?P<tabs> +)points -= abilities\[ability\]\["cost"\]'
+repl='$+{tabs}points -= abilities[ability]["cost"]\r\n\r\n            if hasattr(self, "ability_points"):\r\n                points += self.ability_points'
+
+perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
+
+echo -e "${BGreen}${fn} patched$NC"
 
 #=========== ./scripts/interface/Player_menu.rpy
 fn='./scripts/interface/Player_menu.rpy'
@@ -130,22 +146,20 @@ repl='    textbutton "{size=$+{size}}" + "\$[Player.cash]" $+{pos}:\r\n        a
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
-#turns text for ability points into text button
-#note: as of 0.6a, ability_points was renamed to skill_points and how it works has completely changed. skill_points is NOT a variable/value, but a functional calculation of player levels
-#As such, this is no longer needed. Allowing for someone to modify player levels instead.
-#patt='    text "\[Player.skill_points\]" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)):[\r\n]+        font "(?P<font>[a-zA-Z_]+\.[a-zA-Z]{3,6})"[ \r\n]+        size (?P<size>[0-9]+)'
-#repl='    textbutton "{size=$+{size}}{font=$+{font}}" + "[Player.skill_points]" $+{pos}:\r\n        action SetVariable("Player.skill_points", Player.skill_points + 5)'
-#
-#perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
-
-#allows for draggable player xp bar
-#        bar value (Player.XP - Player.XP_goal/1.75) range (Player.XP_goal - Player.XP_goal/1.75) anchor (1.0, 0.5) pos (0.921, 0.29) xysize (int(277*game_resolution), int(24*game_resolution)):
-
-
 #if I need to break level cap, it's here
 #./scripts/mechanics/progression.rpy
 #define max_level = [15, 15, 15, 20, 25, 30]
-#        bar value (Player.XP - Player.XP_goal/1.75) range (Player.XP_goal - Player.XP_goal/1.75) anchor (1.0, 0.5) pos (0.921, 0.29) xysize (int(277*game_resolution), int(24*game_resolution)):          
+
+#turns text for ability points into text button
+#note: as of 0.6a, ability_points was renamed to skill_points and how it works has completely changed. skill_points is NOT a variable/value, but a functional calculation of player levels
+#chaning the button to call a custom function that checks to make sure ability_points exists, if not create it, then add.
+#this also depends on a re-write of the function skill_points in "./scripts/base/player.rpy"
+patt='    text "\[Player.skill_points\]" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)):[\r\n]+        font "(?P<font>[a-zA-Z_]+\.[a-zA-Z]{3,6})"[ \r\n]+        size (?P<size>[0-9]+)'
+repl='    textbutton "{size=$+{size}}{font=$+{font}}" + "[Player.skill_points]" $+{pos}:\r\n        action Function(addAbilityPoints, 5)'
+
+perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
+
+#allows for draggable player xp bar
 patt='value \(Player\.XP - Player\.XP_goal\/1\.75\) range \(Player\.XP_goal - Player\.XP_goal\/1\.75\)'
 repl='value FieldValue(Player, "XP", Player.XP_goal) range (Player.XP_goal)'
 
