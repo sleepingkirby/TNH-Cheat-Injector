@@ -1,6 +1,6 @@
 import re
 
-v = "1.9beta"
+v = "1.9"
 tab = " " * 4
 newline = "\n"
 
@@ -109,7 +109,7 @@ def player_menu():
 
     #turns text for ability points into text button
     patt='    text "\[Player.skill_points\]" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)):[\r\n]+        font "(?P<font>[a-zA-Z_]+\.[a-zA-Z]{3,6})"[ \r\n]+        size (?P<size>[0-9]+)'
-    repl='    textbutton "{size=\g<size>}{font=\g<font>}" + "[Player.ability_points]" \g<pos>:\n        action Function(addAbilityPoints, 5)' 
+    repl='    textbutton "{size=\g<size>}{font=\g<font>}" + "[Player.skill_points]" \g<pos>:\n        action Function(addAbilityPoints, 5)' 
     fc = re.sub(patt, repl, fc, flags=re.M)
 
     #allows for draggable player xp bar
