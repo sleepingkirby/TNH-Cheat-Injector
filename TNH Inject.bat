@@ -21,7 +21,7 @@ set cheat4=IGFuZCBudW1iZXIgb2YgcGVvcGxlIGNoZWNrcyBmb3IgcGxhY2UgdG8gaGF2ZSBzZXggR
 REM --------------------------------------------------------------------------------
 REM !! DO NOT EDIT BELOW THIS LINE !!
 REM --------------------------------------------------------------------------------
-set "v=1.9"
+set "v=2.0"
 title TNH Inject v%v%
 :init
 REM --------------------------------------------------------------------------------
