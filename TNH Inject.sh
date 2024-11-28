@@ -229,9 +229,13 @@ perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 
 #sets player and character desire values into field values, aka, interactable sliding bars
-patt='value (?<cp>Player).desire'
-repl='value FieldValue($+{cp}, "desire", 100)'
+patt='value Player.desire range 1.0'
+repl='value FieldValue(Player, "desire", range=1.0, step=0.1)'
+perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
+#value Character.desires["orgasm"] range 1.0 
 
+patt='value Character.desire range 1.0'
+repl='value DictValue(Character.desires, "orgasm", range=1.0, step=0.1)'
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 echo -e "${BGreen}${fn} patched$NC"
 
