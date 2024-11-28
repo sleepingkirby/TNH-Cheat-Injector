@@ -1,5 +1,5 @@
 #!/bin/bash
-v='1.9'
+v='2.0'
 rpaurl='https://raw.githubusercontent.com/Shizmob/rpatool/master/rpatool'
 
 clear
@@ -47,7 +47,7 @@ curpath=`pwd`
 
 echo -e "$BGreen Checking if modification has already been done...$NC"
 
-  if [[ -f ./scripts/interface/main_menu.rpy.orig || -f ./scripts/interface/phone.rpy.orig ]]
+  if [[ -f ./scripts/interfaces/main_menu.rpy.orig || -f ./scripts/interfaces/phone.rpy.orig ]]
   then
   echo -e "${BRed}\n\nBackup files found. This probably means it was already patched. No need to further action. Exitting...$NC"
   exit 1
@@ -65,7 +65,7 @@ perlP=`which perl`
   fi
 
 
-  if [[ ! -f ./scripts/interface/main_menu.rpy || ! -f ./scripts/interface/phone.rpy ]]
+  if [[ ! -f ./scripts/interfaces/main_menu.rpy || ! -f ./scripts/interfaces/phone.rpy ]]
   then
   echo -e "${BRed}\n\nFiles to be editted not found. Is it still in the archive.rpa?\n\n$NC"
     if [[ -f ./archive.rpa && ! -f ./rpatool ]]
@@ -87,8 +87,8 @@ perl -i -pe 's/config.developer = "auto"/config.developer = "auto"\ndefine confi
 
 echo -e "${BGreen}${fn} patched$NC"
 
-#=========== ./scripts/interface/phone.rpy (as of 0.5a, this was moved from the phone to the menu. So this is no longer needed and has been moved to Player_menu.rpy (below)
-#fn='./scripts/interface/phone.rpy'
+#=========== ./scripts/interfaces/phone.rpy (as of 0.5a, this was moved from the phone to the menu. So this is no longer needed and has been moved to Player_menu.rpy (below)
+#fn='./scripts/interfaces/phone.rpy'
 #cp $fn $fn.orig
 #
 #
@@ -129,15 +129,15 @@ echo -e "${BGreen}${fn} patched$NC"
 fn='./scripts/base/player.rpy'
 cp $fn $fn.orig
 
-patt='(?P<tabs> +)points -= abilities\[ability\]\["cost"\]'
-repl='$+{tabs}points -= abilities[ability]["cost"]\r\n\r\n            if hasattr(self, "ability_points"):\r\n                points += self.ability_points'
+patt='(?P<tabs> +)points -= all_abilities\[ability\]\["cost"\]'
+repl='$+{tabs}points -= all_abilities[ability]["cost"]\r\n\r\n            if hasattr(self, "ability_points"):\r\n                points += self.ability_points'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 echo -e "${BGreen}${fn} patched$NC"
 
-#=========== ./scripts/interface/Player_menu.rpy
-fn='./scripts/interface/Player_menu.rpy'
+#=========== ./scripts/interfaces/Player_menu.rpy
+fn='./scripts/interfaces/Player_menu.rpy'
 cp $fn $fn.orig
 
 #turns text cash number into textbutton
@@ -166,36 +166,54 @@ repl='value FieldValue(Player, "XP", Player.XP_goal) range (Player.XP_goal)'
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 #turns text for both love and trust into textbuttons
-patt='(?P<tabs1> +)text "\[current_relationships_Entry\.(?P<lt>love|trust)\]"(?P<pos> anchor \([0-9.]+, [0-9.]+\) pos \(0\.[0-9]+, 0\.[0-9]+\)):[ \r\n]+font "(?P<font>[a-zA-Z_]+\.[a-zA-Z]{3,6})"[ \r\n]+size (?P<size>[0-9]+)[ \r\n]+color "[a-z0-9#]+"'
-repl='$+{tabs1}textbutton "{size=$+{size}}{font=$+{font}}" + "[current_relationships_Entry.$+{lt}]"$+{pos}:\r\n$+{tabs1}    action SetVariable("current_relationships_Entry.$+{lt}", current_relationships_Entry.$+{lt} + 100)'
+patt='(?P<tabs1> +)text "\[relationships_Entry\.(?P<lt>love|trust)\]"(?P<pos> anchor \([0-9.]+, [0-9.]+\) pos \(0\.[0-9]+, 0\.[0-9]+\)):[ \r\n]+font "(?P<font>[a-zA-Z_]+\.[a-zA-Z]{3,6})"[ \r\n]+size (?P<size>[0-9]+)[ \r\n]+color "[a-z0-9#]+"'
+repl='$+{tabs1}textbutton "{size=$+{size}}{font=$+{font}}" + "[relationships_Entry.$+{lt}]"$+{pos}:\r\n$+{tabs1}    action SetField(relationships_Entry, "$+{lt}", relationships_Entry.$+{lt} + 100)'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 #turn emotion icons into buttons to turn off said status
-patt='(?P<tabs1> +)add (?P<f>f?)"images\/interface\/Player_menu\/relationships_(?P<status>mad|horny|nympho|\[status\])\.webp" zoom high_resolution_interface_adjustment'
-repl='$+{tabs1}imagebutton idle $+{f}"images\/interface\/Player_menu\/relationships_$+{status}.webp":\r\n$+{tabs1}    at transform:\r\n$+{tabs1}        zoom high_resolution_interface_adjustment\r\n$+{tabs1}    action SetDict(current_relationships_Entry.status, $+{f}"$+{status}", 0)'
+#this was unified into a single function. Good programming on ronchon's part but might be over.
+#patt='(?P<tabs1> +)add (?P<f>f?)"images\/interface\/Player_menu\/relationships_(?P<status>mad|horny|nympho|\[status\])\.webp" zoom high_resolution_interface_adjustment'
+#repl='$+{tabs1}imagebutton idle $+{f}"images\/interface\/Player_menu\/relationships_$+{status}.webp":\r\n$+{tabs1}    at transform:\r\n$+{tabs1}        zoom high_resolution_interface_adjustment\r\n$+{tabs1}    action SetDict(relationships_Entry.status, $+{f}"$+{status}", 0)'
+#
+#perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
+#adapts the relationships_status() to have character as a parameter for mood changing
+patt='screen relationships_status\(status, \*\*properties\):'
+repl='screen relationships_status(status, c, **properties):'
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
-#adding button that allows for removal of cheating
-patt='        text "RELATIONSHIP STATUS" anchor \(0\.0, 0\.5\) pos \(0\.495, 0\.398\):[\r\n]+            font "agency_fb\.ttf"[\r\n]+[\r\n]+            size 28'
-repl='        textbutton "{size=28}{font=agency_fb.ttf} RELATIONSHIP STATUS" anchor (0.0, 0.5) pos (0.495, 0.398):\r\n            action Function(removeCheating, current_relationships_Entry)'
+#setting the relationships_status() function to insert the text as a text button to turn off mood statuses
+patt='(?P<t1> +)text "\[status.upper\(\)\]" anchor \(0\.5, 0\.5\) pos \(0\.5, 0\.85\):[\r\n]+(?P<t2> +)size properties\.get\("text_size", 16\)(?P<br>[\r\n ]+)color properties\.get\("text_color", "#000000"\)'
+repl='$+{t1}textbutton "{size=[properties.get(\\"text_size\\", 16)]}{color=[properties.get(\\"text_color\\", \\"#000000\\")]}" + "[status.upper()]" anchor (0.5, 0.5) pos (0.5, 0.85):\r\n$+{t2}action SetDict(c.status, status, 0)'
+perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
+#adding the character into the relationships_status() call
+patt='(?P<t1> {2,})use relationships_status\([\r\n]+(?P<t2> {2,})(?P<status>[a-zA-Z"]+),[\r\n]+'
+repl='$+{t1}use relationships_status(\r\n$+{t2}$+{status},\r\n$+{t2}relationships_Entry,\r\n'
+perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
+
+
+
+#adding button that allows for removal of cheating
+#        text "RELATIONSHIP STATUS" anchor (0.0, 0.5) pos (0.495, 0.297):
+patt='        text "RELATIONSHIP STATUS" anchor \(0\.0, 0\.5\) pos \((?P<posX>[0-9.]+), (?P<posY>[0-9.]+)\):[\r\n]+            font "agency_fb\.ttf"[\r\n]+[\r\n]+            size 28'
+repl='        textbutton "{size=28}{font=agency_fb.ttf} RELATIONSHIP STATUS" anchor (0.0, 0.5) pos ($+{posX}, $+{posY}):\r\n            action Function(removeCheating, relationships_Entry)'
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 
 #friendship is the best thing ever! (allows for clicking on friendship to increase it by 50)
-#                            add "images/interface/photos/[C].webp" align (0.5, 0.5) zoom 0.13
+#                            add "images/interfaces/photos/[C].webp" align (0.5, 0.5) zoom 0.13
 patt='(?P<tabs> +)add "images\/interface\/photos\/\[C\]\.webp" align (?<align>\([0-9., ]+\)) zoom (?P<zoom>0\.[0-9]+)'
-repl='$+{tabs}imagebutton idle f"images\/interface\/photos\/{C}.webp" align $+{align}:\r\n$+{tabs}    at transform:\r\n$+{tabs}        zoom 0.13\r\n$+{tabs}    action SetDict(current_relationships_Entry.friendship, f"{C}", current_relationships_Entry.friendship[C] + 50)'
+repl='$+{tabs}imagebutton idle f"images\/interface\/photos\/{C}.webp" align $+{align}:\r\n$+{tabs}    at transform:\r\n$+{tabs}        zoom 0.13\r\n$+{tabs}    action SetDict(relationships_Entry.friendship, f"{C}", relationships_Entry.friendship[C] + 50)'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 
 echo -e "${BGreen}${fn} patched$NC"
 
-#=========== ./scripts/interface/actions.rpy
-fn='./scripts/interface/actions.rpy'
+#=========== ./scripts/interfaces/sex.rpy
+fn='./scripts/interfaces/sex.rpy'
 cp $fn $fn.orig
 
 #sets text stamina into textbutton
@@ -204,19 +222,20 @@ repl='        textbutton "{size=$+{size}}" + "[Player.stamina]" $+{pos}:\r\n    
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
-patt='        text "\[Character.stamina\]" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)):[ \r\n]+            size (?P<size>[0-9]+)'
-repl='        textbutton "{size=$+{size}}" + "[Character.stamina]" $+{pos}:\n            action SetVariable("focused_Character.stamina", focused_Character.max_stamina + Character.stamina)'
-perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
+
+#patt='        text "\[Character.stamina\]" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)):[ \r\n]+            size (?P<size>[0-9]+)'
+#repl='        textbutton "{size=$+{size}}" + "[Character.stamina]" $+{pos}:\n            action SetVariable("focused_Character.stamina", focused_Character.max_stamina + Character.stamina)'
+#perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 
 #sets player and character desire values into field values, aka, interactable sliding bars
-patt='value (?<cp>Player|Character).desire'
+patt='value (?<cp>Player).desire'
 repl='value FieldValue($+{cp}, "desire", 100)'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 echo -e "${BGreen}${fn} patched$NC"
 
-#=========== ./scripts/interface/approval.rpy
+#=========== ./scripts/interfaces/approval.rpy
 fn='./scripts/mechanics/approval.rpy'
 cp $fn $fn.orig
 
@@ -253,7 +272,7 @@ perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 echo -e "${BGreen}${fn} patched$NC"
 
-fn='./scripts/interface/interactions.rpy'
+fn='./scripts/interfaces/interactions.rpy'
 cp $fn $fn.orig
 
 #skips bedroom checks and number of people checks for place to have sex GUI
@@ -276,8 +295,8 @@ perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 echo -e "${BGreen}${fn} patched$NC"
 
-#=========== ./scripts/interface/quick_menu.rpy 
-fn='./scripts/interface/quick_menu.rpy' 
+#=========== ./scripts/interfaces/base.rpy 
+fn='./scripts/interfaces/base.rpy' 
 cp $fn $fn.orig
 
 #writes into main menu that cheat is on
@@ -288,8 +307,8 @@ perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 echo -e "${BGreen}${fn} patched$NC"
 
 
-#=========== ./scripts/interface/main_menu.rpy
-fn='./scripts/interface/main_menu.rpy'
+#=========== ./scripts/interfaces/main_menu.rpy
+fn='./scripts/interfaces/main_menu.rpy'
 cp $fn $fn.orig
 
 #writes into main menu that cheat is on
