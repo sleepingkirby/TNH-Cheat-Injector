@@ -22,9 +22,9 @@ def main_menu():
 
 main_menu()
 
-#=============  ./scripts/interfaces/quick_menu.rpy =========
+#=============  ./scripts/interfaces/base.rpy =========
 def quick_menu():
-    fn="./scripts/interfaces/quick_menu.rpy"
+    fn="./scripts/interfaces/base.rpy"
     with open(fn, "r") as file:
         fc = file.read()
 
@@ -119,7 +119,7 @@ def player_menu():
 
     #turns text for both love and trust into textbuttons
     patt='(?P<tabs1> +)text "\[relationships_Entry\.(?P<lt>love|trust)\]"(?P<pos> anchor \([0-9.]+, [0-9.]+\) pos \(0\.[0-9]+, 0\.[0-9]+\)):[ \r\n]+font "(?P<font>[a-zA-Z_]+\.[a-zA-Z]{3,6})"[ \r\n]+size (?P<size>[0-9]+)[ \r\n]+color "[a-z0-9#]+"'
-    repl='\g<tabs1>textbutton "{size=\g<size>}{font=\g<font>}" + "[relationships_Entry.\g<lt>]"\g<pos>:\n\g<tabs1>    action SetVariable("relationships_Entry.\g<lt>", relationships_Entry.\g<lt> + 100)'
+    repl='\g<tabs1>textbutton "{size=\g<size>}{font=\g<font>}" + "[relationships_Entry.\g<lt>]"\g<pos>:\r\n\g<tabs1>    action SetField(relationships_Entry, "\g<lt>", relationships_Entry.\g<lt> + 100)'
     fc = re.sub(patt, repl, fc, flags=re.M)
    
     #turn emotion icons into buttons to turn off said status
@@ -135,7 +135,7 @@ def player_menu():
 
     #setting the relationships_status() function to insert the text as a text button to turn off mood statuses
     patt='(?P<t1> +)text "\[status.upper\(\)\]" anchor \(0\.5, 0\.5\) pos \(0\.5, 0\.85\):[\r\n]+(?P<t2> +)size properties\.get\("text_size", 16\)(?P<br>[\r\n ]+)color properties\.get\("text_color", "#000000"\)'
-    repl='\g<t1>textbutton "{size=[properties.get(\\"text_size\\", 16)]}{color=[properties.get(\\"text_color\\", \\"#000000\\")]}" + "[status.upper()]" anchor (0.5, 0.5) pos (0.5, 0.85):\r\n$+{t2}action SetDict(c.status, status, 0)'
+    repl='\g<t1>textbutton "{size=[properties.get(\\"text_size\\", 16)]}{color=[properties.get(\\"text_color\\", \\"#000000\\")]}" + "[status.upper()]" anchor (0.5, 0.5) pos (0.5, 0.85):\r\n\g<t2>action SetDict(c.status, status, 0)'
     fc = re.sub(patt, repl, fc, flags=re.M)
     
     #adding the character into the relationships_status() call
@@ -185,6 +185,17 @@ def sex():
     repl='value FieldValue(Player, "desire", 100)'
     fc = re.sub(patt, repl, fc, flags=re.M)
 
+    #character desire was redesigned in 0.6b. The bar was split into 2. One at below 1.0 and one at and above 1.0
+    patt='value Character.desire range 1.0'
+    repl='value DictValue(Character.desires, "orgasm", range=1.0, step=0.1)'
+    fc = re.sub(patt, repl, fc, flags=re.M)
+    
+    patt='value Character\.desires\["orgasm"\] range 1\.0'
+    repl='value DictValue(Character.desires, "orgasm", range=1.0, step=0.1)'
+    fc = re.sub(patt, repl, fc, flags=re.M)
+
+
+
     with open(fn, "w") as file:
         file.write(fc)
 
@@ -227,16 +238,8 @@ def allowPublicSex():
         fc = file.read()
 
     #skips bedroom check for place to have sex
-    patt='elif Player.location not in bedrooms and "bg_shower" not in Player.location'
-    repl='elif False and Player.location not in bedrooms and "bg_shower" not in Player.location'
-
-    fc = re.sub(patt, repl, fc, flags=re.M)
-
-
-    #skips people around check
-    patt='    elif len\(Present\) > 1:'
-    repl='    elif False and len(Present) > 1:'
-
+    patt='\(Player\.location not in bedrooms and "bg_shower" not in Player\.location\) or len\(Present\) > 1'
+    repl='False'
     fc = re.sub(patt, repl, fc, flags=re.M)
 
     with open(fn, "w") as file:
