@@ -228,13 +228,18 @@ perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 #perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 
-#sets player and character desire values into field values, aka, interactable sliding bars
+#sets player desire values into field values, aka, interactable sliding bars
 patt='value Player.desire range 1.0'
 repl='value FieldValue(Player, "desire", range=1.0, step=0.1)'
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 #value Character.desires["orgasm"] range 1.0 
 
+#character desire was redesigned in 0.6b. The bar was split into 2. One at below 1.0 and one at and above 1.0
 patt='value Character.desire range 1.0'
+repl='value DictValue(Character.desires, "orgasm", range=1.0, step=0.1)'
+perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
+
+patt='value Character\.desires\["orgasm"\] range 1\.0'
 repl='value DictValue(Character.desires, "orgasm", range=1.0, step=0.1)'
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 echo -e "${BGreen}${fn} patched$NC"
@@ -263,15 +268,8 @@ fn='./scripts/sex/request.rpy'
 cp $fn $fn.orig
 
 #skips bedroom check for place to have sex
-patt='elif Player.location not in bedrooms and "bg_shower" not in Player.location'
-repl='elif False and Player.location not in bedrooms and "bg_shower" not in Player.location'
-
-perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
-
-#skips people around check
-patt='    elif len\(Present\) > 1:'
-repl='    elif False and len(Present) > 1:'
-
+patt='\(Player\.location not in bedrooms and "bg_shower" not in Player\.location\) or len\(Present\) > 1'
+repl='False'
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 echo -e "${BGreen}${fn} patched$NC"
