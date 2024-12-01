@@ -1,6 +1,6 @@
 import re
 
-v = "2.0"
+v = "2.1"
 tab = " " * 4
 newline = "\n"
 
@@ -151,8 +151,8 @@ def player_menu():
     fc = re.sub(patt, repl, fc, flags=re.M)
 
     #friendship is the best thing ever! (allows for clicking on friendship to increase it by 50)
-    patt='(?P<tabs> +)add "images/interfaces/photos/\[C\]\.webp" align (?P<algn>\([a-z0-9,. ]+\)) zoom (?P<zoom>0\.[0-9]+)'
-    repl='\g<tabs>imagebutton idle f"images/interfaces/photos/{C}.webp" align \g<algn>:\n\g<tabs>    at transform:\n\g<tabs>        zoom 0.13\r\n\g<tabs>    action SetDict(relationships_Entry.friendship, f"{C}", relationships_Entry.friendship[C] + 50)'
+    patt='(?P<tabs> +)add "images\/interface\/photos\/\[C\]\.webp" align (?P<algn>\([0-9., ]+\)) zoom (?P<zoom>0\.[0-9]+)'
+    repl='\g<tabs>imagebutton idle f"images/interface/photos/{C}.webp" align \g<algn>:\r\n\g<tabs>    at transform:\r\n\g<tabs>        zoom 0.13\r\n\g<tabs>    action SetDict(relationships_Entry.friendship, f"{C}", relationships_Entry.friendship[C] + 50)'
     fc = re.sub(patt, repl, fc, flags=re.M)
 
 

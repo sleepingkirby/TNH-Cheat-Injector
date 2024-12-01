@@ -1,5 +1,5 @@
 #!/bin/bash
-v='2.0'
+v='2.1'
 rpaurl='https://raw.githubusercontent.com/Shizmob/rpatool/master/rpatool'
 
 clear
@@ -204,7 +204,7 @@ perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 #friendship is the best thing ever! (allows for clicking on friendship to increase it by 50)
 #                            add "images/interfaces/photos/[C].webp" align (0.5, 0.5) zoom 0.13
-patt='(?P<tabs> +)add "images\/interface\/photos\/\[C\]\.webp" align (?<align>\([0-9., ]+\)) zoom (?P<zoom>0\.[0-9]+)'
+patt='(?P<tabs> +)add "images\/interface\/photos\/\[C\]\.webp" align (?P<align>\([0-9., ]+\)) zoom (?P<zoom>0\.[0-9]+)'
 repl='$+{tabs}imagebutton idle f"images\/interface\/photos\/{C}.webp" align $+{align}:\r\n$+{tabs}    at transform:\r\n$+{tabs}        zoom 0.13\r\n$+{tabs}    action SetDict(relationships_Entry.friendship, f"{C}", relationships_Entry.friendship[C] + 50)'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
