@@ -182,7 +182,7 @@ def sex():
 
     #sets player desire values into field values, aka, interactable sliding bars
     patt='value Player.desire'
-    repl='value FieldValue(Player, "desire", 100)'
+    repl='value FieldValue(Player, "desire", range=1.0, step=0.1)'
     fc = re.sub(patt, repl, fc, flags=re.M)
 
     #character desire was redesigned in 0.6b. The bar was split into 2. One at below 1.0 and one at and above 1.0
