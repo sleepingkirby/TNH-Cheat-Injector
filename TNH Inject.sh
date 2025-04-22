@@ -112,7 +112,7 @@ cp $fn $fn.orig
 
 # setup for removing cheating flags
 patt='(?P<tabs> +)def unique\(original\):'
-repl='    def removeCheating(C):\r\n        C.History.remove("cheated_on_flirting_in_public")\r\n        C.History.remove("cheated_on_date")\r\n        C.History.remove("cheated_on_relationship")\r\n        if C.History.permanent.get("cheated_on_flirting_in_public"):\r\n            del C.History.permanent["cheated_on_flirting_in_public"]\r\n        if C.History.permanent.get("cheated_on_date"):\r\n            del C.History.permanent["cheated_on_date"]\r\n        if C.History.permanent.get("cheated_on_relationship"):\r\n            del C.History.permanent["cheated_on_relationship"]\r\n           \r\n        for other_C in all_Companions:\r\n            Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public")\r\n            Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_date")\r\n            Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_relationship")\r\n            if Player.History.permanent.get(f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public"):\r\n                del Player.History.permanent[f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public"]\r\n            if Player.History.permanent.get(f"cheated_on_{C.tag}_with_{other_C.tag}_date"):\r\n                del Player.History.permanent[f"cheated_on_{C.tag}_with_{other_C.tag}_date"]\r\n            if Player.History.permanent.get(f"cheated_on_{C.tag}_with_{other_C.tag}_relationship"):\r\n                del Player.History.permanent[f"cheated_on_{C.tag}_with_{other_C.tag}_relationship"]\r\n        return\r\n\r\n$+{tabs}def unique(original):'
+repl='    def removeCheating(C):\r\n        C.History.remove("cheated_on_flirting_in_public")\r\n        C.History.remove("cheated_on_date")\r\n        C.History.remove("cheated_on_relationship")\r\n        if C.History.permanent.get("cheated_on_flirting_in_public"):\r\n            del C.History.permanent["cheated_on_flirting_in_public"]\r\n        if C.History.permanent.get("cheated_on_date"):\r\n            del C.History.permanent["cheated_on_date"]\r\n        if C.History.permanent.get("cheated_on_relationship"):\r\n            del C.History.permanent["cheated_on_relationship"]\r\n\r\n        for other_C in all_Companions:\r\n            if hasattr(other_C, "tag"):\r\n                Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public")\r\n                Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_date")\r\n                Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_relationship")\r\n                if Player.History.permanent.get(f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public"):\r\n                   del Player.History.permanent[f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public"]\r\n                if Player.History.permanent.get(f"cheated_on_{C.tag}_with_{other_C.tag}_date"):\r\n                   del Player.History.permanent[f"cheated_on_{C.tag}_with_{other_C.tag}_date"]\r\n                if Player.History.permanent.get(f"cheated_on_{C.tag}_with_{other_C.tag}_relationship"):\r\n                   del Player.History.permanent[f"cheated_on_{C.tag}_with_{other_C.tag}_relationship"]\r\n        return\r\n\r\n$+{tabs}def unique(original):'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
@@ -248,14 +248,15 @@ echo -e "${BGreen}${fn} patched$NC"
 fn='./scripts/mechanics/approval.rpy'
 cp $fn $fn.orig
 
+#define max_stats = (1000, 1000, 1000, 1000)
 #breaks approval limit on last season/chapter
 patt='[0-9]{3,},'
 repl='99999,'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
-patt=', [0-9]{3,}\]'
-repl=', 99999]'
+patt=', [0-9]{3,}\)'
+repl=', 99999)'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 echo -e "${BGreen}${fn} patched$NC"
