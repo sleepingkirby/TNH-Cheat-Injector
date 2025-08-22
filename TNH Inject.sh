@@ -1,5 +1,5 @@
 #!/bin/bash
-v='2.2'
+v='2.3'
 rpaurl='https://raw.githubusercontent.com/Shizmob/rpatool/master/rpatool'
 
 clear
@@ -112,7 +112,7 @@ cp $fn $fn.orig
 
 # setup for removing cheating flags
 patt='(?P<tabs> +)def unique\(original\):'
-repl='    def removeCheating(C):\r\n        C.History.remove("cheated_on_flirting_in_public")\r\n        C.History.remove("cheated_on_date")\r\n        C.History.remove("cheated_on_relationship")\r\n        if C.History.permanent.get("cheated_on_flirting_in_public"):\r\n            del C.History.permanent["cheated_on_flirting_in_public"]\r\n        if C.History.permanent.get("cheated_on_date"):\r\n            del C.History.permanent["cheated_on_date"]\r\n        if C.History.permanent.get("cheated_on_relationship"):\r\n            del C.History.permanent["cheated_on_relationship"]\r\n\r\n        for other_C in all_Companions:\r\n            if hasattr(other_C, "tag"):\r\n                Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public")\r\n                Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_date")\r\n                Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_relationship")\r\n                if Player.History.permanent.get(f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public"):\r\n                   del Player.History.permanent[f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public"]\r\n                if Player.History.permanent.get(f"cheated_on_{C.tag}_with_{other_C.tag}_date"):\r\n                   del Player.History.permanent[f"cheated_on_{C.tag}_with_{other_C.tag}_date"]\r\n                if Player.History.permanent.get(f"cheated_on_{C.tag}_with_{other_C.tag}_relationship"):\r\n                   del Player.History.permanent[f"cheated_on_{C.tag}_with_{other_C.tag}_relationship"]\r\n        return\r\n\r\n$+{tabs}def unique(original):'
+repl='    def removeCheating(C):\r\n        C.History.remove("cheated_on_flirting_in_public")\r\n        C.History.remove("cheated_on_date")\r\n        C.History.remove("cheated_on_relationship")\r\n        if hasattr(C.History, "permanent") and C.History.permanent.get("cheated_on_flirting_in_public"):\r\n            del C.History.permanent["cheated_on_flirting_in_public"]\r\n        if hasattr(C.History, "permanent") and C.History.permanent.get("cheated_on_date"):\r\n            del C.History.permanent["cheated_on_date"]\r\n        if hasattr(C.History, "permanent") and C.History.permanent.get("cheated_on_relationship"):\r\n            del C.History.permanent["cheated_on_relationship"]\r\n\r\n        for other_C in all_Companions:\r\n            if hasattr(other_C, "tag"):\r\n                Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public")\r\n                Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_date")\r\n                Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_relationship")\r\n                if hasattr(Player.History, "permanent") and Player.History.permanent.get(f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public"):\r\n                   del Player.History.permanent[f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public"]\r\n                if hasattr(Player.History, "permanent") and Player.History.permanent.get(f"cheated_on_{C.tag}_with_{other_C.tag}_date"):\r\n                   del Player.History.permanent[f"cheated_on_{C.tag}_with_{other_C.tag}_date"]\r\n                if hasattr(Player.History, "permanent") and Player.History.permanent.get(f"cheated_on_{C.tag}_with_{other_C.tag}_relationship"):\r\n                   del Player.History.permanent[f"cheated_on_{C.tag}_with_{other_C.tag}_relationship"]\r\n        return\r\n\r\n$+{tabs}def unique(original):'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
@@ -172,7 +172,7 @@ repl='$+{tabs1}textbutton "{size=$+{size}}{font=$+{font}}" + "[relationships_Ent
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 #turn emotion icons into buttons to turn off said status
-#this was unified into a single function. Good programming on ronchon's part but might be over.
+#this was unified into a single function. Good programming on ronchon's part but might be overkill.
 #patt='(?P<tabs1> +)add (?P<f>f?)"images\/interface\/Player_menu\/relationships_(?P<status>mad|horny|nympho|\[status\])\.webp" zoom high_resolution_interface_adjustment'
 #repl='$+{tabs1}imagebutton idle $+{f}"images\/interface\/Player_menu\/relationships_$+{status}.webp":\r\n$+{tabs1}    at transform:\r\n$+{tabs1}        zoom high_resolution_interface_adjustment\r\n$+{tabs1}    action SetDict(relationships_Entry.status, $+{f}"$+{status}", 0)'
 #
@@ -208,6 +208,16 @@ patt='(?P<tabs> +)add "images\/interface\/full\/photos\/\[C\]\.webp" align (?P<a
 repl='$+{tabs}imagebutton idle f"images\/interface\/full\/photos\/{C}.webp" align $+{align}:\r\n$+{tabs}    at transform:\r\n$+{tabs}        zoom 0.13\r\n$+{tabs}    action SetDict(relationships_Entry.friendship, f"{C}", relationships_Entry.friendship[C] + 50)'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
+
+#Points will add "studied" or "trained" to player history
+#    text "Points" anchor (0.5, 0.5) pos (0.226, 0.306):
+#        size 26
+
+patt='    text "Points" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)):[ \r\n]+        size (?P<size>[0-9]+)'
+
+repl='    textbutton "{size=$+{size}}" + "Points" $+{pos}:\r\n        action Function(Player.History.update, "trained" if skills_leaderboard_type == "combat" else "studied")'
+perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
+
 
 
 echo -e "${BGreen}${fn} patched$NC"
