@@ -81,7 +81,8 @@ perlP=`which perl`
 
 
 #============= config.rpy =========
-fn='./scripts/base/config.rpy'
+#fn='./scripts/base/config.rpy'
+fn='../renpy/common/00console.rpy'
 cp $fn $fn.orig
 perl -i -pe 's/config.developer = "auto"/config.developer = "auto"\ndefine config.console = True/' $fn
 
@@ -106,29 +107,32 @@ echo -e "${BGreen}${fn} patched$NC"
 #echo -e "${BGreen}${fn} patched$NC"
 
 #=========== ./scripts/mechanics/utilities.rpy
-fn='./scripts/mechanics/utilities.rpy'
+fn='./core/mechanics/utilities.rpy'
 cp $fn $fn.orig
 
 
 # setup for removing cheating flags
-patt='(?P<tabs> +)def unique\(original\):'
-repl='    def removeCheating(C):\r\n        C.History.remove("cheated_on_flirting_in_public")\r\n        C.History.remove("cheated_on_date")\r\n        C.History.remove("cheated_on_relationship")\r\n        if hasattr(C.History, "permanent") and C.History.permanent.get("cheated_on_flirting_in_public"):\r\n            del C.History.permanent["cheated_on_flirting_in_public"]\r\n        if hasattr(C.History, "permanent") and C.History.permanent.get("cheated_on_date"):\r\n            del C.History.permanent["cheated_on_date"]\r\n        if hasattr(C.History, "permanent") and C.History.permanent.get("cheated_on_relationship"):\r\n            del C.History.permanent["cheated_on_relationship"]\r\n\r\n        for other_C in all_Companions:\r\n            if hasattr(other_C, "tag"):\r\n                Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public")\r\n                Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_date")\r\n                Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_relationship")\r\n                if hasattr(Player.History, "permanent") and Player.History.permanent.get(f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public"):\r\n                   del Player.History.permanent[f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public"]\r\n                if hasattr(Player.History, "permanent") and Player.History.permanent.get(f"cheated_on_{C.tag}_with_{other_C.tag}_date"):\r\n                   del Player.History.permanent[f"cheated_on_{C.tag}_with_{other_C.tag}_date"]\r\n                if hasattr(Player.History, "permanent") and Player.History.permanent.get(f"cheated_on_{C.tag}_with_{other_C.tag}_relationship"):\r\n                   del Player.History.permanent[f"cheated_on_{C.tag}_with_{other_C.tag}_relationship"]\r\n        return\r\n\r\n$+{tabs}def unique(original):'
+patt='(?P<tabs> +)def unique(original:'
+repl='    def removeCheating(C):\r\n        C.History.remove("cheated_on_flirting_in_public")\r\n        C.History.remove("cheated_on_date")\r\n        C.History.remove("cheated_on_relationship")\r\n        if hasattr(C.History, "permanent") and C.History.permanent.get("cheated_on_flirting_in_public"):\r\n            del C.History.permanent["cheated_on_flirting_in_public"]\r\n        if hasattr(C.History, "permanent") and C.History.permanent.get("cheated_on_date"):\r\n            del C.History.permanent["cheated_on_date"]\r\n        if hasattr(C.History, "permanent") and C.History.permanent.get("cheated_on_relationship"):\r\n            del C.History.permanent["cheated_on_relationship"]\r\n\r\n        for other_C in all_Companions:\r\n            if hasattr(other_C, "tag"):\r\n                Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public")\r\n                Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_date")\r\n                Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_relationship")\r\n                if hasattr(Player.History, "permanent") and Player.History.permanent.get(f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public"):\r\n                   del Player.History.permanent[f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public"]\r\n                if hasattr(Player.History, "permanent") and Player.History.permanent.get(f"cheated_on_{C.tag}_with_{other_C.tag}_date"):\r\n                   del Player.History.permanent[f"cheated_on_{C.tag}_with_{other_C.tag}_date"]\r\n                if hasattr(Player.History, "permanent") and Player.History.permanent.get(f"cheated_on_{C.tag}_with_{other_C.tag}_relationship"):\r\n                   del Player.History.permanent[f"cheated_on_{C.tag}_with_{other_C.tag}_relationship"]\r\n        return\r\n\r\n$+{tabs}def unique(original:'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
-
-patt='(?P<tabs> +)def unique\(original\):'
-repl='$+{tabs}def addAbilityPoints(p):\r\n        if not hasattr(Player, "ability_points"):\r\n            Player.ability_points = 0\r\n        if p > 0:\r\n            Player.ability_points += p\r\n\r\n$+{tabs}def unique(original):'
+# This may not be needed anymore. ability points is now backto being a variable. Granted, in a different place
+patt='(?P<tabs> +)def unique(original:'
+repl='$+{tabs}def addAbilityPoints(p):\r\n        if not hasattr(Player, "ability_points"):\r\n            Player.ability_points = 0\r\n        if p > 0:\r\n            Player.ability_points += p\r\n\r\n$+{tabs}def unique(original:'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 echo -e "${BGreen}${fn} patched$NC"
 
 
-#=========== ./scripts/base/player.rpy 
-fn='./scripts/base/player.rpy'
+#=========== ./scripts/base/player.rpy
+#./core/definitions/player.rpy:106:                    points -= all_abilities[ability]["cost"] 
+#fn='./scripts/base/player.rpy'
+fn='./core/definitions/player.rpy'
 cp $fn $fn.orig
 
+#            points += self.History.check("bought_skill_point")
 patt='(?P<tabs> +)points -= all_abilities\[ability\]\["cost"\]'
 repl='$+{tabs}points -= all_abilities[ability]["cost"]\r\n\r\n            if hasattr(self, "ability_points"):\r\n                points += self.ability_points'
 
@@ -137,7 +141,8 @@ perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 echo -e "${BGreen}${fn} patched$NC"
 
 #=========== ./scripts/interfaces/Player_menu.rpy
-fn='./scripts/interfaces/Player_menu.rpy'
+#fn='./scripts/interfaces/Player_menu.rpy'
+fn='./interfaces/Player_menu.rpy'
 cp $fn $fn.orig
 
 #turns text cash number into textbutton
@@ -154,6 +159,8 @@ perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 #note: as of 0.6a, ability_points was renamed to skill_points and how it works has completely changed. skill_points is NOT a variable/value, but a functional calculation of player levels
 #chaning the button to call a custom function that checks to make sure ability_points exists, if not create it, then add.
 #this also depends on a re-write of the function skill_points in "./scripts/base/player.rpy"
+#additional note: as of 0.8cbeta, this was changed again. Skill points is once again a variable, granted a different variable named self.History.check("bought_skill_point")
+#this means that addAbilityPoints() will probably no longer be needed
 patt='    text "\[Player.skill_points\]" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)):[\r\n]+        font "(?P<font>[a-zA-Z_]+\.[a-zA-Z]{3,6})"[ \r\n]+        size (?P<size>[0-9]+)'
 repl='    textbutton "{size=$+{size}}{font=$+{font}}" + "[Player.skill_points]" $+{pos}:\r\n        action Function(addAbilityPoints, 5)'
 
@@ -204,6 +211,8 @@ perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 #friendship is the best thing ever! (allows for clicking on friendship to increase it by 50)
 #                        add "images/interface/full/photos/[C].webp" align (0.5, 0.5) zoom 0.13
+#as of 0.8cbeta:
+#                        add "images/interfaces/full/photos/[C].webp" align (0.5, 0.5) zoom 0.13
 patt='(?P<tabs> +)add "images\/interface\/full\/photos\/\[C\]\.webp" align (?P<align>\([0-9., ]+\)) zoom (?P<zoom>0\.[0-9]+)'
 repl='$+{tabs}imagebutton idle f"images\/interface\/full\/photos\/{C}.webp" align $+{align}:\r\n$+{tabs}    at transform:\r\n$+{tabs}        zoom 0.13\r\n$+{tabs}    action SetDict(relationships_Entry.friendship, f"{C}", relationships_Entry.friendship[C] + 50)'
 
@@ -223,7 +232,8 @@ perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 echo -e "${BGreen}${fn} patched$NC"
 
 #=========== ./scripts/interfaces/sex.rpy
-fn='./scripts/interfaces/sex.rpy'
+#fn='./scripts/interfaces/sex.rpy'
+fn='./interfaces/sex.rpy'
 cp $fn $fn.orig
 
 #sets text stamina into textbutton
@@ -255,7 +265,8 @@ perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 echo -e "${BGreen}${fn} patched$NC"
 
 #=========== ./scripts/interfaces/approval.rpy
-fn='./scripts/mechanics/approval.rpy'
+#fn='./scripts/mechanics/approval.rpy'
+fn='./core/mechanics/approval.rpy'
 cp $fn $fn.orig
 
 #define max_stats = (1000, 1000, 1000, 1000)
@@ -274,11 +285,13 @@ echo -e "${BGreen}${fn} patched$NC"
 
 #=========== allowing sex in public. Props to RonChon. 2 Checks in place to prevent this.
 # Did I do this because darkstel couldn't get over himself? Yep. Is it a bit immature? Yep. Do I feel ashamed? Nope. If you don't want code to change, don't poke a programmer.
-#=========== ./scripts/sex/request.rpy
-fn='./scripts/sex/request.rpy'
+#=========== ./core/mechanics/sex/request.rpy
+#fn='./scripts/sex/request.rpy'
+fn='./core/mechanics/sex/request.rpy'
 cp $fn $fn.orig
 
 #skips bedroom check for place to have sex
+#        elif (Player.location not in Bedrooms and "bg_shower" not in Player.location) or Present - {Character}:
 patt='\(Player\.location not in bedrooms and "bg_shower" not in Player\.location\) or len\(Present\) > 1'
 repl='False'
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
@@ -289,6 +302,7 @@ fn='./scripts/interfaces/interactions.rpy'
 cp $fn $fn.orig
 
 #skips bedroom checks and number of people checks for place to have sex GUI
+#                    if check_approval(Character, threshold = "hookup") and len(Present) == 1 and Player.location in {Character.home, Player.home} and not get_Present(location = Player.location.replace("_", "_shower_"))[0]:
 patt='if approval_check\(Character, threshold = "hookup"\) and len\(Present\) == 1 and Player.location in \[Character.home, Player.home\] and not get_Present\(location = Player.location.replace\("_", "_shower_"\)\)\[0\]'
 repl='if approval_check(Character, threshold = "hookup") and len(Present) >= 1'
 
@@ -308,8 +322,27 @@ perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 echo -e "${BGreen}${fn} patched$NC"
 
-#=========== ./scripts/interfaces/base.rpy 
-fn='./scripts/interfaces/base.rpy' 
+
+#=========== ./core/mechanics/sex/utilities.rpy
+#./core/mechanics/sex/utilities.rpy
+#
+#    python:
+#        if (not ongoing_Event or has_Action_control) and not automatic:
+#            for C in Present:
+#                for location in list(C.spunk.keys()):
+#                    if C.spunk[location]:
+#                        if location != "mouth":
+#                            clean_cum_mess(C)
+#                        else:
+#                            C.spunk[location] = 0 
+#                            C.persistent_spunk[location] = 0
+#
+#    return
+
+
+#=========== ./interfaces/base.rpy 
+#fn='./scripts/interfaces/base.rpy' 
+fn='./interfaces/base.rpy'
 cp $fn $fn.orig
 
 #writes into main menu that cheat is on
@@ -320,8 +353,9 @@ perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 echo -e "${BGreen}${fn} patched$NC"
 
 
-#=========== ./scripts/interfaces/main_menu.rpy
-fn='./scripts/interfaces/main_menu.rpy'
+#=========== ./interfaces/main_menu.rpy
+#fn='./scripts/interfaces/main_menu.rpy'
+fn='./interfaces/main_menu.rpy'
 cp $fn $fn.orig
 
 #writes into main menu that cheat is on
