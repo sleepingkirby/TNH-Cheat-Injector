@@ -106,7 +106,7 @@ echo -e "${BGreen}${fn} patched$NC"
 #
 #echo -e "${BGreen}${fn} patched$NC"
 
-#=========== ./scripts/mechanics/utilities.rpy
+#=========== ./core/mechanics/utilities.rpy
 fn='./core/mechanics/utilities.rpy'
 cp $fn $fn.orig
 
@@ -118,27 +118,27 @@ repl='    def removeCheating(C):\r\n        C.remove_trait("cheated_on_flirting"
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 # This may not be needed anymore. ability points is now backto being a variable. Granted, in a different place
-patt='(?P<tabs> +)def unique(original:'
-repl='$+{tabs}def addAbilityPoints(p):\r\n        if not hasattr(Player, "ability_points"):\r\n            Player.ability_points = 0\r\n        if p > 0:\r\n            Player.ability_points += p\r\n\r\n$+{tabs}def unique(original:'
-
-perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
+#patt='(?P<tabs> +)def unique(original:'
+#repl='$+{tabs}def addAbilityPoints(p):\r\n        if not hasattr(Player, "ability_points"):\r\n            Player.ability_points = 0\r\n        if p > 0:\r\n            Player.ability_points += p\r\n\r\n$+{tabs}def unique(original:'
+#
+#perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 echo -e "${BGreen}${fn} patched$NC"
 
-
-#=========== ./scripts/base/player.rpy
+# There's now (as of v0.8c) a history check for "bought_skill_point" So, rather than implementing my own points, I'm just going to hook into that.
+#=========== ./core/definitions/player.rpy
 #./core/definitions/player.rpy:106:                    points -= all_abilities[ability]["cost"] 
 #fn='./scripts/base/player.rpy'
-fn='./core/definitions/player.rpy'
-cp $fn $fn.orig
-
-#            points += self.History.check("bought_skill_point")
-patt='(?P<tabs> +)points -= all_abilities\[ability\]\["cost"\]'
-repl='$+{tabs}points -= all_abilities[ability]["cost"]\r\n\r\n            if hasattr(self, "ability_points"):\r\n                points += self.ability_points'
-
-perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
-
-echo -e "${BGreen}${fn} patched$NC"
+#fn='./core/definitions/player.rpy'
+#cp $fn $fn.orig
+#
+##            points += self.History.check("bought_skill_point")
+#patt='(?P<tabs> +)points -= all_abilities\[ability\]\["cost"\]'
+#repl='$+{tabs}points -= all_abilities[ability]["cost"]\r\n\r\n            if hasattr(self, "ability_points"):\r\n                points += self.ability_points'
+#
+#perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
+#
+#echo -e "${BGreen}${fn} patched$NC"
 
 #=========== ./scripts/interfaces/Player_menu.rpy
 #fn='./scripts/interfaces/Player_menu.rpy'
@@ -162,7 +162,7 @@ perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 #additional note: as of 0.8cbeta, this was changed again. Skill points is once again a variable, granted a different variable named self.History.check("bought_skill_point")
 #this means that addAbilityPoints() will probably no longer be needed
 patt='    text "\[Player.skill_points\]" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)):[\r\n]+        font "(?P<font>[a-zA-Z_]+\.[a-zA-Z]{3,6})"[ \r\n]+        size (?P<size>[0-9]+)'
-repl='    textbutton "{size=$+{size}}{font=$+{font}}" + "[Player.skill_points]" $+{pos}:\r\n        action Function(addAbilityPoints, 5)'
+repl='    textbutton "{size=$+{size}}{font=$+{font}}" + "[Player.skill_points]" $+{pos}:\r\n        action Function(Player.History.update, "bought_skill_point")'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
