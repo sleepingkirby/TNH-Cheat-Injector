@@ -65,7 +65,7 @@ perlP=`which perl`
   fi
 
 
-  if [[ ! -f ./scripts/interfaces/main_menu.rpy || ! -f ./scripts/interfaces/phone.rpy ]]
+  if [[ ! -f ./interfaces/main_menu.rpy || ! -f ./interfaces/phone.rpy ]]
   then
   echo -e "${BRed}\n\nFiles to be editted not found. Is it still in the archive.rpa?\n\n$NC"
     if [[ -f ./archive.rpa && ! -f ./rpatool ]]
@@ -112,8 +112,8 @@ cp $fn $fn.orig
 
 
 # setup for removing cheating flags
-patt='(?P<tabs> +)def unique(original:'
-repl='    def removeCheating(C):\r\n        C.remove_trait("cheated_on_flirting")\r\n        C.remove_trait("cheated_on_flirting_in_public")\r\n        C.remove_trait("cheated_on_date")\r\n        C.remove_trait("cheated_on_relationship")\r\n        C.History.remove("cheated_on_flirting")\r\n        C.History.remove("cheated_on_flirting_in_public")\r\n        C.History.remove("cheated_on_date")\r\n        C.History.remove("cheated_on_relationship")\r\n        if "permanent" in C.History.trackers and "cheated_on_flirting_in_public" in C.History.trackers["permanent"]:\r\n            del C.History.trackers["permanent"]["cheated_on_flirting_in_public"]\r\n        if "permanent" in C.History and C.History.trackers["permanent"].get("cheated_on_date"):\r\n            del C.History.trackers["permanent"]["cheated_on_date"]\r\n        if "permanent" in C.History and C.History.trackers["permanent"].get("cheated_on_relationship"):\r\n            del C.History.trackers["permanent"]["cheated_on_relationship"]\r\n\r\n        for other_C in GameState.all_Companions:\r\n            if hasattr(other_C, "tag"):\r\n                Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public")\r\n                Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_date")\r\n                Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_relationship")\r\n                if "permanent" in Player.History and Player.History.trackers["permanent"](f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public"):\r\n                   del Player.History.permanent[f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public"]\r\n                if "permanent" in Player.History and Player.History.trackers["permanent"](f"cheated_on_{C.tag}_with_{other_C.tag}_date"):\r\n                   del Player.History.permanent[f"cheated_on_{C.tag}_with_{other_C.tag}_date"]\r\n                if "permanent" in Player.History and Player.History.trackers["permanent"](f"cheated_on_{C.tag}_with_{other_C.tag}_relationship"):\r\n                   del Player.History.permanent[f"cheated_on_{C.tag}_with_{other_C.tag}_relationship"]\r\n        return\r\n\r\n$+{tabs}def unique(original:'
+patt='(?P<tabs> +)def unique\(original:'
+repl='    def removeCheating(C):\r\n        C.remove_trait("cheated_on_flirting")\r\n        C.remove_trait("cheated_on_flirting_in_public")\r\n        C.remove_trait("cheated_on_date")\r\n        C.remove_trait("cheated_on_relationship")\r\n        C.History.remove("cheated_on_flirting")\r\n        C.History.remove("cheated_on_flirting_in_public")\r\n        C.History.remove("cheated_on_date")\r\n        C.History.remove("cheated_on_relationship")\r\n        if "permanent" in C.History.trackers and "cheated_on_flirting_in_public" in C.History.trackers["permanent"]:\r\n            del C.History.trackers["permanent"]["cheated_on_flirting_in_public"]\r\n        if "permanent" in C.History.trackers and "cheated_on_date" in C.History.trackers["permanent"]:\r\n            del C.History.trackers["permanent"]["cheated_on_date"]\r\n        if "permanent" in C.History.trackers and "cheated_on_relationship" in C.History.trackers["permanent"]:\r\n            del C.History.trackers["permanent"]["cheated_on_relationship"]\r\n\r\n        for other_C in GameState.all_Companions:\r\n            if hasattr(other_C, "tag"):\r\n                Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public")\r\n                Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_date")\r\n                Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_relationship")\r\n                if "permanent" in Player.History.trackers and f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public" in Player.History.trackers["permanent"]:\r\n                   del Player.History.permanent[f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public"]\r\n                if "permanent" in Player.History.trackers and f"cheated_on_{C.tag}_with_{other_C.tag}_date" in Player.History.trackers["permanent"]:\r\n                   del Player.History.trackers["permanent"][f"cheated_on_{C.tag}_with_{other_C.tag}_date"]\r\n                if "permanent" in Player.History.trackers and f"cheated_on_{C.tag}_with_{other_C.tag}_relationship" in Player.History.trackers["permanent"]:\r\n                   del Player.History.permanent[f"cheated_on_{C.tag}_with_{other_C.tag}_relationship"]\r\n        return\r\n\r\n$+{tabs}def unique(original:'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
@@ -167,7 +167,8 @@ repl='    textbutton "{size=$+{size}}{font=$+{font}}" + "[Player.skill_points]" 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 #allows for draggable player xp bar
-patt='value \(Player\.XP - Player\.XP_goal\/1\.75\) range \(Player\.XP_goal - Player\.XP_goal\/1\.75\)'
+#        bar value (Player.XP - Player.XP_goal / 1.75) range (Player.XP_goal - Player.XP_goal / 1.75) anchor (1.0, 0.5) pos (0.921, 0.285) xysize (int(277 * game_resolution), int(24 * game_resolution)):
+patt='value \(Player\.XP - Player\.XP_goal \/ 1\.75\) range \(Player\.XP_goal - Player\.XP_goal \/ 1\.75\)'
 repl='value FieldValue(Player, "XP", Player.XP_goal) range (Player.XP_goal)'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
@@ -192,7 +193,7 @@ perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 #setting the relationships_status() function to insert the text as a text button to turn off mood statuses
 patt='(?P<t1> +)text "\[status.upper\(\)\]" anchor \(0\.5, 0\.5\) pos \(0\.5, 0\.85\):[\r\n]+(?P<t2> +)size properties\.get\("text_size", 16\)(?P<br>[\r\n ]+)color properties\.get\("text_color", "#000000"\)'
-repl='$+{t1}textbutton "{size=[properties.get(\\"text_size\\", 16)]}{color=[properties.get(\\"text_color\\", \\"#000000\\")]}" + "[status.upper()]" anchor (0.5, 0.5) pos (0.5, 0.85):\r\n$+{t2}action SetDict(c.status, status, 0)'
+repl='$+{t1}textbutton "{size=[properties.get(\\"text_size\\", 16)]}{color=[properties.get(\\"text_color\\", \\"#000000\\")]}" + "[status.upper()]" anchor (0.5, 0.5) pos (0.5, 0.85):\r\n$+{t2}action SetDict(c._status, status, 0)'
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 #adding the character into the relationships_status() call
