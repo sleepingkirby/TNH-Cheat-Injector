@@ -293,7 +293,7 @@ cp $fn $fn.orig
 
 #skips bedroom check for place to have sex
 #        elif (Player.location not in Bedrooms and "bg_shower" not in Player.location) or Present - {Character}:
-patt='\(Player\.location not in bedrooms and "bg_shower" not in Player\.location\) or Present - \{Character\}'
+patt='\(Player\.location not in Bedrooms and "bg_shower" not in Player\.location\) or Present - \{Character\}'
 repl='False'
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
