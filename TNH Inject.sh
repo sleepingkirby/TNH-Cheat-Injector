@@ -1,5 +1,5 @@
 #!/bin/bash
-v='2.3'
+v='2.4'
 rpaurl='https://raw.githubusercontent.com/Shizmob/rpatool/master/rpatool'
 
 clear
@@ -140,8 +140,7 @@ echo -e "${BGreen}${fn} patched$NC"
 #
 #echo -e "${BGreen}${fn} patched$NC"
 
-#=========== ./scripts/interfaces/Player_menu.rpy
-#fn='./scripts/interfaces/Player_menu.rpy'
+#=========== ./interfaces/Player_menu.rpy
 fn='./interfaces/Player_menu.rpy'
 cp $fn $fn.orig
 
@@ -167,7 +166,6 @@ repl='    textbutton "{size=$+{size}}{font=$+{font}}" + "[Player.skill_points]" 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 #allows for draggable player xp bar
-#        bar value (Player.XP - Player.XP_goal / 1.75) range (Player.XP_goal - Player.XP_goal / 1.75) anchor (1.0, 0.5) pos (0.921, 0.285) xysize (int(277 * game_resolution), int(24 * game_resolution)):
 patt='value \(Player\.XP - Player\.XP_goal \/ 1\.75\) range \(Player\.XP_goal - Player\.XP_goal \/ 1\.75\)'
 repl='value FieldValue(Player, "XP", Player.XP_goal) range (Player.XP_goal)'
 
@@ -224,7 +222,6 @@ perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 #        size 26
 
 patt='    text "Points" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)):[ \r\n]+        size (?P<size>[0-9]+)'
-
 repl='    textbutton "{size=$+{size}}" + "Points" $+{pos}:\r\n        action Function(Player.History.update, "trained" if skills_leaderboard_type == "combat" else "studied")'
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
@@ -265,8 +262,7 @@ repl='value DictValue(Character.desires, "orgasm", range=1.0, step=0.1)'
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 echo -e "${BGreen}${fn} patched$NC"
 
-#=========== ./scripts/interfaces/approval.rpy
-#fn='./scripts/mechanics/approval.rpy'
+#=========== ./core/mechanics/approval.rpy
 fn='./core/mechanics/approval.rpy'
 cp $fn $fn.orig
 
@@ -287,7 +283,6 @@ echo -e "${BGreen}${fn} patched$NC"
 #=========== allowing sex in public. Props to RonChon. 2 Checks in place to prevent this.
 # Did I do this because darkstel couldn't get over himself? Yep. Is it a bit immature? Yep. Do I feel ashamed? Nope. If you don't want code to change, don't poke a programmer.
 #=========== ./core/mechanics/sex/request.rpy
-#fn='./scripts/sex/request.rpy'
 fn='./core/mechanics/sex/request.rpy'
 cp $fn $fn.orig
 

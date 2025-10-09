@@ -21,7 +21,7 @@ set cheat4=c3RhbWluYV0iIFxnPHBvcz46XG4gICAgICAgICAgICBhY3Rpb24gU2V0VmFyaWFibGUoI
 REM --------------------------------------------------------------------------------
 REM !! DO NOT EDIT BELOW THIS LINE !!
 REM --------------------------------------------------------------------------------
-set "v=2.3"
+set "v=2.4"
 title TNH Inject v%v%
 :init
 REM --------------------------------------------------------------------------------
@@ -68,7 +68,7 @@ if exist "game" if exist "lib" if exist "renpy" (
 
 if not exist "%pythondir%python.exe" (
 	echo    ! Error: Cannot locate python.exe, unable to continue.
-	echo             Are you sure we're in the game's root directory?
+	echo             Are you sure we're in the "game" directory?
 	echo.
 	pause>nul|set/p=.            Press any key to exit...
 	exit
