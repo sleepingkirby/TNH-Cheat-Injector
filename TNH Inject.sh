@@ -213,8 +213,8 @@ perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 #                        add "images/interface/full/photos/[C].webp" align (0.5, 0.5) zoom 0.13
 #as of 0.8cbeta:
 #                        add "images/interfaces/full/photos/[C].webp" align (0.5, 0.5) zoom 0.13
-patt='(?P<tabs> +)add "images\/interface\/full\/photos\/\[C\]\.webp" align (?P<align>\([0-9., ]+\)) zoom (?P<zoom>0\.[0-9]+)'
-repl='$+{tabs}imagebutton idle f"images\/interface\/full\/photos\/{C}.webp" align $+{align}:\r\n$+{tabs}    at transform:\r\n$+{tabs}        zoom 0.13\r\n$+{tabs}    action SetDict(relationships_Entry.friendship, f"{C}", relationships_Entry.friendship[C] + 50)'
+patt='(?P<tabs> +)add "images\/interfaces\/full\/photos\/\[C\]\.webp" align (?P<align>\([0-9., ]+\)) zoom (?P<zoom>0\.[0-9]+)'
+repl='$+{tabs}imagebutton idle f"images\/interfaces\/full\/photos\/{C}.webp" align $+{align}:\r\n$+{tabs}    at transform:\r\n$+{tabs}        zoom 0.13\r\n$+{tabs}    action SetDict(relationships_Entry.friendship, f"{C}", relationships_Entry.friendship[C] + 50)'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
@@ -292,35 +292,37 @@ cp $fn $fn.orig
 
 #skips bedroom check for place to have sex
 #        elif (Player.location not in Bedrooms and "bg_shower" not in Player.location) or Present - {Character}:
-patt='\(Player\.location not in bedrooms and "bg_shower" not in Player\.location\) or len\(Present\) > 1'
+patt='\(Player\.location not in bedrooms and "bg_shower" not in Player\.location\) or Present - \{Character\}'
 repl='False'
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 echo -e "${BGreen}${fn} patched$NC"
 
-fn='./scripts/interfaces/interactions.rpy'
+#fn='./scripts/interfaces/interactions.rpy'
+fn='./interfaces/interactions.rpy'
 cp $fn $fn.orig
 
 #skips bedroom checks and number of people checks for place to have sex GUI
 #                    if check_approval(Character, threshold = "hookup") and len(Present) == 1 and Player.location in {Character.home, Player.home} and not get_Present(location = Player.location.replace("_", "_shower_"))[0]:
-patt='if approval_check\(Character, threshold = "hookup"\) and len\(Present\) == 1 and Player.location in \[Character.home, Player.home\] and not get_Present\(location = Player.location.replace\("_", "_shower_"\)\)\[0\]'
-repl='if approval_check(Character, threshold = "hookup") and len(Present) >= 1'
+patt='if check_approval\(Character, threshold = "hookup"\) and len\(Present\) == 1 and Player.location in \{Character.home, Player.home\} and not get_Present\(location = Player.location.replace\("_", "_shower_"\)\)\[0\]'
+repl='if check_approval(Character, threshold = "hookup") and len(Present) >= 1'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 echo -e "${BGreen}${fn} patched$NC"
 
-#=========== ./scripts/mechanics/movement.rpy 
-fn='./scripts/mechanics/movement.rpy'
-cp $fn $fn.orig
-
-#character won't wipe off cum when exiting bed room after wearing cum 10 times
-patt='                if temp_Characters\[0\]\.spunk\[location\]'
-repl='                if temp_Characters[0].History.check("wear_cum") < 10 and temp_Characters[0].spunk[location]'
-
-perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
-
-echo -e "${BGreen}${fn} patched$NC"
+#=========== ./scripts/mechanics/movement.rpy
+# No longer needed as there's a game mechanic to allow the character to wear cum
+#fn='./scripts/mechanics/movement.rpy'
+#cp $fn $fn.orig
+#
+##character won't wipe off cum when exiting bed room after wearing cum 10 times
+#patt='                if temp_Characters\[0\]\.spunk\[location\]'
+#repl='                if temp_Characters[0].History.check("wear_cum") < 10 and temp_Characters[0].spunk[location]'
+#
+#perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
+#
+#echo -e "${BGreen}${fn} patched$NC"
 
 
 #=========== ./core/mechanics/sex/utilities.rpy
