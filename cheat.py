@@ -46,7 +46,7 @@ def console():
     with open(fn, "r") as file:
         fc = file.read()
 
-    fc = fc.replace('config\.console = False', 'config.console = True')
+    fc = fc.replace('config.console = False', 'config.console = True')
 
     with open(fn, "w") as file:
         file.write(fc)
@@ -60,8 +60,7 @@ def utilities():
     fn="./core/mechanics/utilities.rpy"
     with open(fn, "r") as file:
         fc = file.read()
-
-    patt=r'(?P<tabs> +)def unique\(original\):'
+    patt=r'(?P<tabs> +)def unique\(original:'
     repl=r'    def removeCheating(C):\r\n        C.remove_trait("cheated_on_flirting")\r\n        C.remove_trait("cheated_on_flirting_in_public")\r\n        C.remove_trait("cheated_on_date")\r\n        C.remove_trait("cheated_on_relationship")\r\n        C.History.remove("cheated_on_flirting")\r\n        C.History.remove("cheated_on_flirting_in_public")\r\n        C.History.remove("cheated_on_date")\r\n        C.History.remove("cheated_on_relationship")\r\n        if "permanent" in C.History.trackers and "cheated_on_flirting_in_public" in C.History.trackers["permanent"]:\r\n            del C.History.trackers["permanent"]["cheated_on_flirting_in_public"]\r\n        if "permanent" in C.History.trackers and "cheated_on_date" in C.History.trackers["permanent"]:\r\n            del C.History.trackers["permanent"]["cheated_on_date"]\r\n        if "permanent" in C.History.trackers and "cheated_on_relationship" in C.History.trackers["permanent"]:\r\n            del C.History.trackers["permanent"]["cheated_on_relationship"]\r\n\r\n        for other_C in GameState.all_Companions:\r\n            if hasattr(other_C, "tag"):\r\n                Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public")\r\n                Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_date")\r\n                Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_relationship")\r\n                if "permanent" in Player.History.trackers and f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public" in Player.History.trackers["permanent"]:\r\n                   del Player.History.permanent[f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public"]\r\n                if "permanent" in Player.History.trackers and f"cheated_on_{C.tag}_with_{other_C.tag}_date" in Player.History.trackers["permanent"]:\r\n                   del Player.History.trackers["permanent"][f"cheated_on_{C.tag}_with_{other_C.tag}_date"]\r\n                if "permanent" in Player.History.trackers and f"cheated_on_{C.tag}_with_{other_C.tag}_relationship" in Player.History.trackers["permanent"]:\r\n                   del Player.History.permanent[f"cheated_on_{C.tag}_with_{other_C.tag}_relationship"]\r\n        return\r\n\r\n\g<tabs>def unique(original:'
 
     fc = re.sub(patt, repl, fc, flags=re.M)
@@ -197,7 +196,7 @@ def approval():
     fc = re.sub(patt, repl, fc, flags=re.M)
 
     patt=r', [0-9]{3,}\)'
-    repl=r', 99999]'
+    repl=r', 99999)'
 
     fc = re.sub(patt, repl, fc, flags=re.M)
 
@@ -234,8 +233,8 @@ def allowPublicSex():
         fc = file.read()
 
     #skips bedroom checks and number of people checks for place to have sex GUI
-    patt=r'if approval_check\(Character, threshold = "hookup"\) and len\(Present\) == 1 and Player.location in \{Character.home, Player.home\} and not get_Present\(location = Player.location.replace\("_", "_shower_"\)\)\[0\]'
-    repl=r'if approval_check(Character, threshold = "hookup") and len(Present) >= 1'
+    patt=r'if check_approval\(Character, threshold = "hookup"\) and len\(Present\) == 1 and Player.location in \{Character.home, Player.home\} and not get_Present\(location = Player.location.replace\("_", "_shower_"\)\)\[0\]'
+    repl=r'if check_approval(Character, threshold = "hookup") and len(Present) >= 1'
 
     fc = re.sub(patt, repl, fc, flags=re.M)
 
