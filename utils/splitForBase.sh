@@ -7,7 +7,7 @@
 
   if [[ ! -f $1 ]]
   then
-  echo -e "$0 <file to base64> <var name> <bits to split [optional]>\n"
+  echo -e "$0 <file to base64> <var name (usually 'cheat')> <bits to split [optional]>\n"
   exit 1
   fi
 
