@@ -146,7 +146,7 @@ cp $fn $fn.orig
 
 #turns text cash number into textbutton
 patt='    text "\$\[Player\.cash\]" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)):[\r\n]+        size (?P<size>[0-9]+)'
-repl='    textbutton "{size=$+{size}}" + "\$[Player.cash]" $+{pos}:\r\n        action SetVariable("Player.cash", Player.cash + 50000)'
+repl='    textbutton "{size=$+{size}}" + "\$[Player.cash]" $+{pos}:\r\n        action SetVariable("Player.cash", int(Player.cash) + int(50000))'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
@@ -184,22 +184,15 @@ perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 #
 #perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
-#adapts the relationships_status() to have character as a parameter for mood changing
-patt='screen relationships_status\(status, \*\*properties\):'
-repl='screen relationships_status(status, c, **properties):'
-perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
-
 #setting the relationships_status() function to insert the text as a text button to turn off mood statuses
 patt='(?P<t1> +)text "\[status.upper\(\)\]" anchor \(0\.5, 0\.5\) pos \(0\.5, 0\.85\):[\r\n]+(?P<t2> +)size properties\.get\("text_size", 16\)(?P<br>[\r\n ]+)color properties\.get\("text_color", "#000000"\)'
-repl='$+{t1}textbutton "{size=[properties.get(\\"text_size\\", 16)]}{color=[properties.get(\\"text_color\\", \\"#000000\\")]}" + "[status.upper()]" anchor (0.5, 0.5) pos (0.5, 0.85):\r\n$+{t2}action SetDict(c._status, status, 0)'
+repl='$+{t1}textbutton "{size=[properties.get(\\"text_size\\", 16)]}{color=[properties.get(\\"text_color\\", \\"#000000\\")]}" + "[status.upper()]" anchor (0.5, 0.5) pos (0.5, 0.85):\r\n$+{t2}action SetDict(properties.get("char")._status, status, 0)'
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 #adding the character into the relationships_status() call
 patt='(?P<t1> {2,})use relationships_status\([\r\n]+(?P<t2> {2,})(?P<status>[a-zA-Z"]+),[\r\n]+'
-repl='$+{t1}use relationships_status(\r\n$+{t2}$+{status},\r\n$+{t2}relationships_Entry,\r\n'
+repl='$+{t1}use relationships_status(\r\n$+{t2}$+{status},\r\n$+{t2}char = relationships_Entry,\r\n'
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
-
-
 
 #adding button that allows for removal of cheating
 #        text "RELATIONSHIP STATUS" anchor (0.0, 0.5) pos (0.495, 0.297):
@@ -266,19 +259,23 @@ echo -e "${BGreen}${fn} patched$NC"
 fn='./core/mechanics/approval.rpy'
 cp $fn $fn.orig
 
-#define max_stats = (1000, 1000, 1000, 1000)
-#breaks approval limit on last season/chapter
-patt='[0-9]{3,},'
-repl='99999,'
+# This was changed. RonChon has given the game the option to whether or not or not to cap the stats per season.
+# The below is just for per season.
+#patt='[0-9]{3,},'
+#repl='99999,'
+#
+#perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
+#
+#patt=', [0-9]{3,}\)'
+#repl=', 99999)'
+#perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
-perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
-
-patt=', [0-9]{3,}\)'
-repl=', 99999)'
+##breaks approval limit
+patt='max_stat = max_stats\[season - 1\] if persistent\.stat_caps else 1000'
+repl='max_stat = max_stats[season - 1] if persistent.stat_caps else 99999'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 echo -e "${BGreen}${fn} patched$NC"
-
 
 #=========== allowing sex in public. Props to RonChon. 2 Checks in place to prevent this.
 # Did I do this because darkstel couldn't get over himself? Yep. Is it a bit immature? Yep. Do I feel ashamed? Nope. If you don't want code to change, don't poke a programmer.
