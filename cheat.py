@@ -1,6 +1,6 @@
 import re
 
-v = "2.4"
+v = "2.5"
 tab = " " * 4
 newline = "\n"
 
@@ -80,7 +80,7 @@ def player_menu():
 
     #turns text cash number into textbutton
     patt=r'    text "\$\[Player\.cash\]" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)):[\r\n]+        size (?P<size>[0-9]+)'
-    repl=r'    textbutton "{size=\g<size>}" + "$[Player.cash]" \g<pos>:\r\n        action SetVariable("Player.cash", Player.cash + 50000)'
+    repl=r'    textbutton "{size=\g<size>}" + "$[Player.cash]" \g<pos>:\r\n        action SetVariable("Player.cash", int(Player.cash) + int(50000))'
     fc = re.sub(patt, repl, fc, flags=re.M)
 
     #turns text for ability points into text button
@@ -104,19 +104,14 @@ def player_menu():
     #repl='\g<tabs1>imagebutton idle \g<f>"images/interfaces/Player_menu/relationships_\g<status>.webp":\r\n\g<tabs1>    at transform:\r\n\g<tabs1>        zoom high_resolution_interface_adjustment\r\n\g<tabs1>    action SetDict(relationships_Entry.status, \g<f>"\g<status>", 0)'
     #fc = re.sub(patt, repl, fc, flags=re.M)
 
-    #adapts the relationships_status() to have character as a parameter for mood changing
-    patt=r'screen relationships_status\(status, \*\*properties\):'
-    repl=r'screen relationships_status(status, c, **properties):'
-    fc = re.sub(patt, repl, fc, flags=re.M)
-
     #setting the relationships_status() function to insert the text as a text button to turn off mood statuses
     patt=r'(?P<t1> +)text "\[status.upper\(\)\]" anchor \(0\.5, 0\.5\) pos \(0\.5, 0\.85\):[\r\n]+(?P<t2> +)size properties\.get\("text_size", 16\)(?P<br>[\r\n ]+)color properties\.get\("text_color", "#000000"\)'
-    repl=r'\g<t1>textbutton "{size=[properties.get(\\"text_size\\", 16)]}{color=[properties.get(\\"text_color\\", \\"#000000\\")]}" + "[status.upper()]" anchor (0.5, 0.5) pos (0.5, 0.85):\r\n\g<t2>action SetDict(c._status, status, 0)'
+    repl=r'\g<t1>textbutton "{size=[properties.get(\\"text_size\\", 16)]}{color=[properties.get(\\"text_color\\", \\"#000000\\")]}" + "[status.upper()]" anchor (0.5, 0.5) pos (0.5, 0.85):\r\n\g<t2>action SetDict(properties.get("char")._status, status, 0)'
     fc = re.sub(patt, repl, fc, flags=re.M)
     
     #adding the character into the relationships_status() call
     patt=r'(?P<t1> {2,})use relationships_status\([\r\n]+(?P<t2> {2,})(?P<status>[a-zA-Z"]+),[\r\n]+'
-    repl=r'\g<t1>use relationships_status(\r\n\g<t2>\g<status>,\r\n\g<t2>relationships_Entry,\r\n'
+    repl=r'\g<t1>use relationships_status(\r\n\g<t2>\g<status>,\r\n\g<t2>char = relationships_Entry,\r\n'
     fc = re.sub(patt, repl, fc, flags=re.M)
 
 
@@ -189,14 +184,9 @@ def approval():
     with open(fn, "r") as file:
         fc = file.read()
 
-    #breaks approval limit
-    patt=r'[0-9]{3,},'
-    repl=r'99999,'
-
-    fc = re.sub(patt, repl, fc, flags=re.M)
-
-    patt=r', [0-9]{3,}\)'
-    repl=r', 99999)'
+    ##breaks approval limit
+    patt=r'max_stat = max_stats\[season - 1\] if persistent\.stat_caps else 1000'
+    repl=r'max_stat = max_stats[season - 1] if persistent.stat_caps else 99999'
 
     fc = re.sub(patt, repl, fc, flags=re.M)
 

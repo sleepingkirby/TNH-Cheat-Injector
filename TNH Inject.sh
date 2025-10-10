@@ -1,5 +1,5 @@
 #!/bin/bash
-v='2.4'
+v='2.5'
 rpaurl='https://raw.githubusercontent.com/Shizmob/rpatool/master/rpatool'
 
 clear
