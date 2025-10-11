@@ -1,6 +1,6 @@
 import re
 
-v = "2.5"
+v = "2.6"
 tab = " " * 4
 newline = "\n"
 
@@ -234,5 +234,47 @@ def allowPublicSex():
     print(f"{fn} patched")
 
 allowPublicSex()
+
+
+#=========== ./core/mechanics/approval.rpy
+def achievementPoints():
+    fn="./definitions/player.rpy"
+    with open(fn, "r") as file:
+        fc = file.read()
+
+    patt=r'(?P<tabs> +)self\.call_sign: str = self\.name'
+    repl=r'\g<tabs>self.call_sign: str = self.name\r\n\g<tabs>self.achievePoints = 0'
+
+    fc = re.sub(patt, repl, fc, flags=re.M)
+
+    patt=r'(?P<tabs> +)points = 0'
+    repl=r'\g<tabs>points = 0 + self.achievePoints'
+
+    fc = re.sub(patt, repl, fc, flags=re.M)
+
+    with open(fn, "w") as file:
+        file.write(fc)
+
+    print(f"{fn} patched")
+
+    fn="./interfaces/phone.rpy"
+    with open(fn, "r") as file:
+        fc = file.read()
+
+    patt=r'(?P<t1> +)text "\[Player\.achievement_points\]"(?P<anchor> anchor \([0-9,. ]+\))(?P<pos> pos \([0-9,. ]+\)):[\r\n]+(?P<t2> +)size (?P<size>[0-9]+)[\r\n ]+color "(?P<color>#[0-9A-Fa-f]+)"'
+    repl=r'\g<t1>textbutton "{size=\g<size>}{color=\g<color>}" + "[Player.achievement_points]"\g<anchor>\g<pos>:\r\n\g<t2>action SetVariable("Player.achievePoints", int(Player.achievePoints) + int(500))'
+
+    fc = re.sub(patt, repl, fc, flags=re.M)
+
+    with open(fn, "w") as file:
+        file.write(fc)
+
+    print(f"{fn} patched")
+
+
+
+achievementPoints()
+
+
 
 print(f"    Success! Cheats are now enabled!")

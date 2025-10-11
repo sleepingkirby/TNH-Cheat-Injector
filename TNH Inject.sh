@@ -346,7 +346,6 @@ repl='$+{tabs}self.call_sign: str = self.name\r\n$+{tabs}self.achievePoints = 0'
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 
-
 # Adding achievePoints to achievement_points total
 patt='(?P<tabs> +)points = 0'
 repl='$+{tabs}points = 0 + self.achievePoints'
