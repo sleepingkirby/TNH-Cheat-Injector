@@ -1,5 +1,5 @@
 #!/bin/bash
-v='2.5'
+v='2.6'
 rpaurl='https://raw.githubusercontent.com/Shizmob/rpatool/master/rpatool'
 
 clear
@@ -47,7 +47,7 @@ curpath=`pwd`
 
 echo -e "$BGreen Checking if modification has already been done...$NC"
 
-  if [[ -f ./scripts/interfaces/main_menu.rpy.orig || -f ./scripts/interfaces/phone.rpy.orig ]]
+  if [[ -f ./interfaces/main_menu.rpy.orig || -f ./interfaces/phone.rpy.orig ]]
   then
   echo -e "${BRed}\n\nBackup files found. This probably means it was already patched. No need to further action. Exitting...$NC"
   exit 1
@@ -334,6 +334,38 @@ echo -e "${BGreen}${fn} patched$NC"
 #
 #    return
 
+#========== ./definitions/player.rpy
+# Rolling in my own achievement points
+fn='./definitions/player.rpy'
+cp $fn $fn.orig
+#            self.call_sign: str = self.name
+# Adding achievePoints to achievement_points total
+patt='(?P<tabs> +)self\.call_sign: str = self\.name'
+repl='$+{tabs}self.call_sign: str = self.name\r\n$+{tabs}self.achievePoints = 0'
+
+perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
+
+
+
+# Adding achievePoints to achievement_points total
+patt='(?P<tabs> +)points = 0'
+repl='$+{tabs}points = 0 + self.achievePoints'
+
+perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
+
+echo -e "${BGreen}${fn} patched$NC"
+
+#========== ./interfaces/phone.rpy
+# Adding GUI for acheivement points 
+fn='./interfaces/phone.rpy'
+cp $fn $fn.orig
+
+patt='(?P<t1> +)text "\[Player\.achievement_points\]"(?P<anchor> anchor \([0-9,. ]+\))(?P<pos> pos \([0-9,. ]+\)):[\r\n]+(?P<t2> +)size (?P<size>[0-9]+)[\r\n ]+color "(?P<color>#[0-9A-Fa-f]+)"'
+repl='$+{t1}textbutton "{size=$+{size}}{color=$+{color}}" + "[Player.achievement_points]"$+{anchor}$+{pos}:\r\n$+{t2}action SetVariable("Player.achievePoints", int(Player.achievePoints) + int(500))'
+
+perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
+
+echo -e "${BGreen}${fn} patched$NC"
 
 #=========== ./interfaces/base.rpy 
 #fn='./scripts/interfaces/base.rpy' 
