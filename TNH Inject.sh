@@ -306,6 +306,7 @@ echo -e "${BGreen}${fn} patched$NC"
 
 #=========== ./scripts/mechanics/movement.rpy
 # No longer needed as there's a game mechanic to allow the character to wear cum
+#I was wrong about the above. They will wear cum, but when changing clothes or moving, they will clean it off. The code was also change to a different location
 #fn='./scripts/mechanics/movement.rpy'
 #cp $fn $fn.orig
 #
@@ -333,6 +334,35 @@ echo -e "${BGreen}${fn} patched$NC"
 #                            C.persistent_spunk[location] = 0
 #
 #    return
+
+
+#=========== ./core/mechanics/clothing.rpy
+#./core/mechanics/clothing.rpy
+fn='./core/mechanics/clothing.rpy'
+cp $fn $fn.orig
+# will leave cum on if wore cum 10 or more times
+patt='if spunk:'
+repl='if C.History.check("wear_cum") < 10 and spunk:'
+
+perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
+
+echo -e "${BGreen}${fn} patched$NC"
+
+#                    elif C.destination in public_Locations and not C.check_trait("exhibitionist"):
+# this is fixing a bug with the current code for walking around with cum. The clean_cum() function can crash because it's running an interaction when you're in an interaction
+#=========== core/mechanics/behavior.rpy
+fn='./core/mechanics/behavior.rpy'
+cp $fn $fn.orig
+# will leave cum on if wore cum 10 or more times
+patt='elif C\.destination in public_Locations and not C\.check_trait\("exhibitionist"\)'
+repl='elif C.destination in public_Locations and not C.check_trait("exhibitionist") and False'
+
+perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
+
+echo -e "${BGreen}${fn} patched$NC"
+
+
+
 
 #========== ./definitions/player.rpy
 # Rolling in my own achievement points
