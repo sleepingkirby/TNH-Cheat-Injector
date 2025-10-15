@@ -1,6 +1,6 @@
 import re
 
-v = "2.6"
+v = "2.7"
 tab = " " * 4
 newline = "\n"
 
@@ -235,8 +235,48 @@ def allowPublicSex():
 
 allowPublicSex()
 
+#=========== ./core/mechanics/clothing.rpy
+def allowWearCum():
+#./core/mechanics/clothing.rpy
+  fn='./core/mechanics/clothing.rpy'
+  with open(fn, "r") as file:
+      fc = file.read()
 
-#=========== ./core/mechanics/approval.rpy
+  # will leave cum on if wore cum 10 or more times
+  patt=r'if spunk:'
+  repl=r'if C.History.check("wear_cum") < 10 and spunk:'
+
+  fc = re.sub(patt, repl, fc, flags=re.M)
+
+  with open(fn, "w") as file:
+      file.write(fc)
+
+  print(f"{fn} patched")
+
+  
+  #                    elif C.destination in public_Locations and not C.check_trait("exhibitionist"):
+  # this is fixing a bug with the current code for walking around with cum. The clean_cum() function can crash because it's running an interaction when you're in an interaction
+  #=========== core/mechanics/behavior.rpy
+  fn='./core/mechanics/behavior.rpy'
+  with open(fn, "r") as file:
+      fc = file.read()
+
+  # will leave cum on if wore cum 10 or more times
+  patt=r'elif C\.destination in public_Locations and not C\.check_trait\("exhibitionist"\)'
+  repl=r'elif C.destination in public_Locations and not C.check_trait("exhibitionist") and False'
+  
+  fc = re.sub(patt, repl, fc, flags=re.M)
+
+  with open(fn, "w") as file:
+      file.write(fc)
+
+  print(f"{fn} patched")
+
+
+allowWearCum()
+
+
+#=========== ./definitions/player.rpy
 def achievementPoints():
     fn="./definitions/player.rpy"
     with open(fn, "r") as file:
