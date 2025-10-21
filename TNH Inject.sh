@@ -1,5 +1,5 @@
 #!/bin/bash
-v='2.7'
+v='2.8'
 rpaurl='https://raw.githubusercontent.com/Shizmob/rpatool/master/rpatool'
 
 clear
@@ -170,6 +170,14 @@ patt='value \(Player\.XP - Player\.XP_goal \/ 1\.75\) range \(Player\.XP_goal - 
 repl='value FieldValue(Player, "XP", Player.XP_goal) range (Player.XP_goal)'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
+
+
+#allows for draggable player xp bar for level 1
+patt='value Player\.XP range Player\.XP_goal'
+repl='value FieldValue(Player, "XP", Player.XP_goal) range(Player.XP_goal)'
+
+perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
+
 
 #turns text for both love and trust into textbuttons
 patt='(?P<tabs1> +)text "\[relationships_Entry\.(?P<lt>love|trust)\]"(?P<pos> anchor \([0-9.]+, [0-9.]+\) pos \(0\.[0-9]+, 0\.[0-9]+\)):[ \r\n]+font "(?P<font>[a-zA-Z_]+\.[a-zA-Z]{3,6})"[ \r\n]+size (?P<size>[0-9]+)[ \r\n]+color "[a-z0-9#]+"'
