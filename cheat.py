@@ -1,6 +1,6 @@
 import re
 
-v = "2.7"
+v = "2.8"
 tab = " " * 4
 newline = "\n"
 
@@ -90,6 +90,11 @@ def player_menu():
 
     #allows for draggable player xp bar
     patt=r'value \(Player\.XP - Player\.XP_goal \/ 1\.75\) range \(Player\.XP_goal - Player\.XP_goal \/ 1\.75\)'
+    repl=r'value FieldValue(Player, "XP", Player.XP_goal) range (Player.XP_goal)'
+    fc = re.sub(patt, repl, fc, flags=re.M)
+
+    #allows for draggable player xp bar for level 1
+    patt=r'value Player\.XP range Player\.XP_goal'
     repl=r'value FieldValue(Player, "XP", Player.XP_goal) range (Player.XP_goal)'
     fc = re.sub(patt, repl, fc, flags=re.M)
 
