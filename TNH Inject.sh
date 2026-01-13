@@ -67,15 +67,16 @@ perlP=`which perl`
 
   if [[ ! -f ./interfaces/main_menu.rpy || ! -f ./interfaces/phone.rpy ]]
   then
-  echo -e "${BRed}\n\nFiles to be editted not found. Is it still in the archive.rpa?\n\n$NC"
-    if [[ -f ./archive.rpa && ! -f ./rpatool ]]
+  echo -e "${BRed}\n\nFiles to be editted not found. Is it still in the core.rpa?\n\n$NC"
+    if [[ -f ./core.rpa && ! -f ./rpatool ]]
     then
     echo -e "$BRed Rpatool missing. Downloading$NC"
     wget $rpaurl
     chmod 755 ./rpatool
     fi
-  echo -e "$BRed Extracting archive.rpa...$NC"
-  ./rpatool -x ./archive.rpa
+  echo -e "$BRed Extracting core.rpa and game.rpa...$NC"
+  ./rpatool -x ./core.rpa
+  ./rpatool -x ./game.rpa
   wait
   fi
 
@@ -140,8 +141,8 @@ echo -e "${BGreen}${fn} patched$NC"
 #
 #echo -e "${BGreen}${fn} patched$NC"
 
-#=========== ./interfaces/Player_menu.rpy
-fn='./interfaces/Player_menu.rpy'
+#=========== ./interfaces/Player_menu/inventory.rpy
+fn='./interfaces/Player_menu/inventory.rpy'
 cp $fn $fn.orig
 
 #turns text cash number into textbutton
@@ -150,9 +151,11 @@ repl='    textbutton "{size=$+{size}}" + "\$[Player.cash]" $+{pos}:\r\n        a
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
-#if I need to break level cap, it's here
-#./scripts/mechanics/progression.rpy
-#define max_level = [15, 15, 15, 20, 25, 30]
+
+
+#=========== ./interfaces/Player_menu/skills.rpy
+fn='./interfaces/Player_menu/skills.rpy'
+cp $fn $fn.orig
 
 #turns text for ability points into text button
 #note: as of 0.6a, ability_points was renamed to skill_points and how it works has completely changed. skill_points is NOT a variable/value, but a functional calculation of player levels
@@ -178,6 +181,20 @@ repl='value FieldValue(Player, "XP", Player.XP_goal) range(Player.XP_goal)'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
+#Points will add "studied" or "trained" to player history
+#    text "Points" anchor (0.5, 0.5) pos (0.226, 0.306):
+#        size 26
+
+patt='    text "Points" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)):[ \r\n]+        size (?P<size>[0-9]+)'
+repl='    textbutton "{size=$+{size}}" + "Points" $+{pos}:\r\n        action Function(Player.History.update, "trained" if skills_leaderboard_type == "combat" else "studied")'
+perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
+
+echo -e "${BGreen}${fn} patched$NC"
+
+
+#=========== ./interfaces/Player_menu/relationships.rpy 
+fn='./interfaces/Player_menu/relationships.rpy'
+cp $fn $fn.orig
 
 #turns text for both love and trust into textbuttons
 patt='(?P<tabs1> +)text "\[relationships_Entry\.(?P<lt>love|trust)\]"(?P<pos> anchor \([0-9.]+, [0-9.]+\) pos \(0\.[0-9]+, 0\.[0-9]+\)):[ \r\n]+font "(?P<font>[a-zA-Z_]+\.[a-zA-Z]{3,6})"[ \r\n]+size (?P<size>[0-9]+)[ \r\n]+color "[a-z0-9#]+"'
@@ -213,20 +230,12 @@ perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 #                        add "images/interface/full/photos/[C].webp" align (0.5, 0.5) zoom 0.13
 #as of 0.8cbeta:
 #                        add "images/interfaces/full/photos/[C].webp" align (0.5, 0.5) zoom 0.13
-patt='(?P<tabs> +)add "images\/interfaces\/full\/photos\/\[C\]\.webp" align (?P<align>\([0-9., ]+\)) zoom (?P<zoom>0\.[0-9]+)'
-repl='$+{tabs}imagebutton idle f"images\/interfaces\/full\/photos\/{C}.webp" align $+{align}:\r\n$+{tabs}    at transform:\r\n$+{tabs}        zoom 0.13\r\n$+{tabs}    action SetDict(relationships_Entry.friendship, f"{C}", relationships_Entry.friendship[C] + 50)'
+#as of 0.9aBeta:
+#                        add "characters/[C]/images/photo.webp" align (0.5, 0.5) zoom 0.13
+patt='(?P<tabs> +)add "characters\/\[C\]\/images\/photo\.webp" align (?P<align>\([0-9., ]+\)) zoom (?P<zoom>0\.[0-9]+)'
+repl='$+{tabs}imagebutton idle f"characters\/{C}\/images\/photo\.webp" align $+{align}:\r\n$+{tabs}    at transform:\r\n$+{tabs}        zoom 0.13\r\n$+{tabs}    action SetDict(relationships_Entry.friendship, f"{C}", relationships_Entry.friendship[C] + 50)'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
-
-#Points will add "studied" or "trained" to player history
-#    text "Points" anchor (0.5, 0.5) pos (0.226, 0.306):
-#        size 26
-
-patt='    text "Points" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)):[ \r\n]+        size (?P<size>[0-9]+)'
-repl='    textbutton "{size=$+{size}}" + "Points" $+{pos}:\r\n        action Function(Player.History.update, "trained" if skills_leaderboard_type == "combat" else "studied")'
-perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
-
-
 
 echo -e "${BGreen}${fn} patched$NC"
 
@@ -293,7 +302,9 @@ cp $fn $fn.orig
 
 #skips bedroom check for place to have sex
 #        elif (Player.location not in Bedrooms and "bg_shower" not in Player.location) or Present - {Character}:
-patt='\(Player\.location not in Bedrooms and "bg_shower" not in Player\.location\) or Present - \{Character\}'
+#        elif (Player.location not in Bedrooms and "Shower" not in Player.location) or get_present_Characters(Player.location) - {Character}:
+
+patt='\(Player\.location not in Bedrooms and "Shower" not in Player\.location\) or get_present_Characters\(Player\.location\) - \{Character\}'
 repl='False'
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
@@ -304,9 +315,9 @@ fn='./interfaces/interactions.rpy'
 cp $fn $fn.orig
 
 #skips bedroom checks and number of people checks for place to have sex GUI
-#                    if check_approval(Character, threshold = "hookup") and len(Present) == 1 and Player.location in {Character.home, Player.home} and not get_Present(location = Player.location.replace("_", "_shower_"))[0]:
-patt='if check_approval\(Character, threshold = "hookup"\) and len\(Present\) == 1 and Player.location in \{Character.home, Player.home\} and not get_Present\(location = Player.location.replace\("_", "_shower_"\)\)\[0\]'
-repl='if check_approval(Character, threshold = "hookup") and len(Present) >= 1'
+#                    if check_approval(Character, threshold = "hookup") and len(get_visible_Characters(Player.location)) == 1 and Player.location in {Character.home, Player.home} and not get_visible_Characters(Player.location.replace("Room", "Shower")):
+patt='if check_approval\(Character, threshold = "hookup"\) and len\(get_visible_Characters\(Player\.location\)\) == 1 and Player\.location in {Character\.home, Player\.home} and not get_visible_Characters\(Player\.location\.replace\("Room", "Shower"\)\):'
+repl='if check_approval(Character, threshold = "hookup") and len(get_visible_Characters(Player.location)) >= 1:'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
@@ -393,8 +404,9 @@ perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 echo -e "${BGreen}${fn} patched$NC"
 
 #========== ./interfaces/phone.rpy
+#./interfaces/phone/achievements.rpy
 # Adding GUI for acheivement points 
-fn='./interfaces/phone.rpy'
+fn='./interfaces/phone/achievements.rpy'
 cp $fn $fn.orig
 
 patt='(?P<t1> +)text "\[Player\.achievement_points\]"(?P<anchor> anchor \([0-9,. ]+\))(?P<pos> pos \([0-9,. ]+\)):[\r\n]+(?P<t2> +)size (?P<size>[0-9]+)[\r\n ]+color "(?P<color>#[0-9A-Fa-f]+)"'
@@ -410,8 +422,9 @@ fn='./interfaces/base.rpy'
 cp $fn $fn.orig
 
 #writes into main menu that cheat is on
-patt='        textbutton _\("Q.Load"\):\r\n            action QuickLoad\(\)'
-repl='        textbutton _("Q.Load"):\r\n            action QuickLoad()\r\n\r\n        textbutton _("CheatV'$v'"):\r\n            action NullAction()'
+#        textbutton _("Q.Load") action QuickLoad() text_size quick_text_size
+patt='        textbutton _\("Q.Load"\) action QuickLoad\(\) text_size quick_text_size'
+repl='        textbutton _("Q.Load") action QuickLoad() text_size quick_text_size\r\n\r\n        textbutton _("CheatV'$v'"):\r\n            action NullAction()'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 echo -e "${BGreen}${fn} patched$NC"
