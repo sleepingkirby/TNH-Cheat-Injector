@@ -65,7 +65,7 @@ perlP=`which perl`
   fi
 
 
-  if [[ ! -f ./interfaces/main_menu.rpy || ! -f ./interfaces/phone.rpy ]]
+  if [[ ! -f ./interfaces/main_menu.rpy ]]
   then
   echo -e "${BRed}\n\nFiles to be editted not found. Is it still in the core.rpa?\n\n$NC"
     if [[ -f ./core.rpa && ! -f ./rpatool ]]
@@ -110,7 +110,6 @@ echo -e "${BGreen}${fn} patched$NC"
 #=========== ./core/mechanics/utilities.rpy
 fn='./core/mechanics/utilities.rpy'
 cp $fn $fn.orig
-
 
 # setup for removing cheating flags
 patt='(?P<tabs> +)def unique\(original:'
@@ -233,7 +232,7 @@ perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 #as of 0.9aBeta:
 #                        add "characters/[C]/images/photo.webp" align (0.5, 0.5) zoom 0.13
 patt='(?P<tabs> +)add "characters\/\[C\]\/images\/photo\.webp" align (?P<align>\([0-9., ]+\)) zoom (?P<zoom>0\.[0-9]+)'
-repl='$+{tabs}imagebutton idle f"characters\/{C}\/images\/photo\.webp" align $+{align}:\r\n$+{tabs}    at transform:\r\n$+{tabs}        zoom 0.13\r\n$+{tabs}    action SetDict(relationships_Entry.friendship, f"{C}", relationships_Entry.friendship[C] + 50)'
+repl='$+{tabs}imagebutton idle f"characters\/{C}\/images\/photo.webp" align $+{align}:\r\n$+{tabs}    at transform:\r\n$+{tabs}        zoom 0.13\r\n$+{tabs}    action SetDict(relationships_Entry.friendship, f"{C}", relationships_Entry.friendship[C] + 50)'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
@@ -257,13 +256,13 @@ perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 
 #sets player desire values into field values, aka, interactable sliding bars
-patt='value Player.desire range 1.0'
+patt='value Player.desire range 1\.0'
 repl='value FieldValue(Player, "desire", range=1.0, step=0.1)'
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 #value Character.desires["orgasm"] range 1.0 
 
 #character desire was redesigned in 0.6b. The bar was split into 2. One at below 1.0 and one at and above 1.0
-patt='value Character.desire range 1.0'
+patt='value Character.desire range 1\.0'
 repl='value DictValue(Character.desires, "orgasm", range=1.0, step=0.1)'
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
