@@ -1,5 +1,5 @@
 #!/bin/bash
-v='2.9'
+v='2.91'
 rpaurl='https://raw.githubusercontent.com/Shizmob/rpatool/master/rpatool'
 
 clear
@@ -359,8 +359,8 @@ echo -e "${BGreen}${fn} patched$NC"
 fn='./core/mechanics/clothing.rpy'
 cp $fn $fn.orig
 # will leave cum on if wore cum 10 or more times
-patt='if spunk:'
-repl='if C.History.check("wear_cum") < 10 and spunk:'
+patt='if mess:'
+repl='if C.History.check("wear_cum") < 10 and mess:'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
@@ -422,8 +422,8 @@ cp $fn $fn.orig
 
 #writes into main menu that cheat is on
 #        textbutton _("Q.Load") action QuickLoad() text_size quick_text_size
-patt='        textbutton _\("Q.Load"\) action QuickLoad\(\) text_size quick_text_size'
-repl='        textbutton _("Q.Load") action QuickLoad() text_size quick_text_size\r\n\r\n        textbutton _("CheatV'$v'"):\r\n            action NullAction()'
+patt='(?P<t1> +)textbutton _\("Q.Load"\) action QuickLoad\(\) text_size quick_text_size'
+repl='$+{t1}textbutton _("Q.Load") action QuickLoad() text_size quick_text_size\r\n\r\n$+{t1}textbutton _("CheatV'$v'"):\r\n$+{t1}    action NullAction()'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 echo -e "${BGreen}${fn} patched$NC"
