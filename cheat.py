@@ -1,6 +1,6 @@
 import re
 
-v = "2.9"
+v = "2.91"
 tab = " " * 4
 newline = "\n"
 
@@ -28,8 +28,8 @@ def quick_menu():
     with open(fn, "r") as file:
         fc = file.read()
 
-    patt=r'        textbutton _\("Q.Load"\) action QuickLoad\(\) text_size quick_text_size'
-    repl=r'        textbutton _("Q.Load") action QuickLoad() text_size quick_text_size\n\n        textbutton _("CheatV'+v+'"):\n            action NullAction()'
+    patt=r'(?P<t1> +)textbutton _\("Q.Load"\) action QuickLoad\(\) text_size quick_text_size'
+    repl=r'\g<t1>textbutton _("Q.Load") action QuickLoad() text_size quick_text_size\n\n\g<t1>textbutton _("CheatV'+v+r'"):\n\g<t1>    action NullAction()'
 
     fc = re.sub(patt, repl, fc, flags=re.M)
 
@@ -272,8 +272,8 @@ def allowWearCum():
       fc = file.read()
 
   # will leave cum on if wore cum 10 or more times
-  patt=r'if spunk:'
-  repl=r'if C.History.check("wear_cum") < 10 and spunk:'
+  patt=r'if mess:'
+  repl=r'if C.History.check("wear_cum") < 10 and mess:'
 
   fc = re.sub(patt, repl, fc, flags=re.M)
 
