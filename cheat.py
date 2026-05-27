@@ -1,6 +1,6 @@
 import re
 
-v = "2.91"
+v = "2.92"
 tab = " " * 4
 newline = "\n"
 
@@ -157,8 +157,8 @@ def relationships():
     fc = re.sub(patt, repl, fc, flags=re.M)
 
     #friendship is the best thing ever! (allows for clicking on friendship to increase it by 50)
-    patt=r'(?P<tabs> +)add "characters/\[C\]/images/photo\.webp" align (?P<algn>\([0-9., ]+\)) zoom (?P<zoom>0\.[0-9]+)'
-    repl=r'\g<tabs>imagebutton idle f"characters/{C}/images/photo.webp" align \g<algn>:\r\n\g<tabs>    at transform:\r\n\g<tabs>        zoom 0.13\r\n\g<tabs>    action SetDict(relationships_Entry.friendship, f"{C}", relationships_Entry.friendship[C] + 50)'
+    patt=r'(?P<tabs> +)add "characters/\[C\.tag\]/images/photo\.webp" align (?P<align>\([0-9., ]+\)) zoom (?P<zoom>0\.[0-9]+)'
+    repl=r'\g<tabs>imagebutton idle f"characters/{C.tag}/images/photo.webp" align \g<align>:\r\n\g<tabs>    at transform:\r\n\g<tabs>        zoom 0.13\r\n\g<tabs>    action SetField(all_Friendships[create_friendship_key(relationships_Entry, C)], "_score", all_Friendships[create_friendship_key(relationships_Entry, C)]._score + 50)'
     fc = re.sub(patt, repl, fc, flags=re.M)
 
     with open(fn, "w") as file:

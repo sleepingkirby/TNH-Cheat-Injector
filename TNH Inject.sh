@@ -237,7 +237,7 @@ perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 #Ex. all_Friendships["JeanGrey_Rogue"]._score has the actual score, but also the different levels.
 patt='(?P<tabs> +)add "characters\/\[C\.tag\]\/images\/photo\.webp" align (?P<align>\([0-9., ]+\)) zoom (?P<zoom>0\.[0-9]+)'
 #repl='$+{tabs}imagebutton idle f"characters\/{C\.tag}\/images\/photo.webp" align $+{align}:\r\n$+{tabs}    at transform:\r\n$+{tabs}        zoom 0.13\r\n$+{tabs}    action SetDict(relationships_Entry.friendship, f"{C}", relationships_Entry.friendship[C] + 50)'
-repl='$+{tabs}imagebutton idle f"characters\/{C\.tag}\/images\/photo.webp" align $+{align}:\r\n$+{tabs}    at transform:\r\n$+{tabs}        zoom 0.13\r\n$+{tabs}    action SetField(all_Friendships[create_friendship_key(relationships_Entry, C)], "_score", all_Friendships[create_friendship_key(relationships_Entry, C)]._score + 50)'
+repl='$+{tabs}imagebutton idle f"characters\/{C.tag}\/images\/photo.webp" align $+{align}:\r\n$+{tabs}    at transform:\r\n$+{tabs}        zoom 0.13\r\n$+{tabs}    action SetField(all_Friendships[create_friendship_key(relationships_Entry, C)], "_score", all_Friendships[create_friendship_key(relationships_Entry, C)]._score + 50)'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
