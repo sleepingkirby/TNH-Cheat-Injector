@@ -1,5 +1,5 @@
 #!/bin/bash
-v='2.91'
+v='2.92'
 rpaurl='https://raw.githubusercontent.com/Shizmob/rpatool/master/rpatool'
 
 clear
@@ -231,8 +231,13 @@ perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 #                        add "images/interfaces/full/photos/[C].webp" align (0.5, 0.5) zoom 0.13
 #as of 0.9aBeta:
 #                        add "characters/[C]/images/photo.webp" align (0.5, 0.5) zoom 0.13
-patt='(?P<tabs> +)add "characters\/\[C\]\/images\/photo\.webp" align (?P<align>\([0-9., ]+\)) zoom (?P<zoom>0\.[0-9]+)'
-repl='$+{tabs}imagebutton idle f"characters\/{C}\/images\/photo.webp" align $+{align}:\r\n$+{tabs}    at transform:\r\n$+{tabs}        zoom 0.13\r\n$+{tabs}    action SetDict(relationships_Entry.friendship, f"{C}", relationships_Entry.friendship[C] + 50)'
+#as of 0.9b:
+#                        add "characters/[C.tag]/images/photo.webp" align (0.5, 0.5) zoom 0.13
+#also, the friendship system was re-rewritten so that all friendships are put under the all_Frienships global variable
+#Ex. all_Friendships["JeanGrey_Rogue"]._score has the actual score, but also the different levels.
+patt='(?P<tabs> +)add "characters\/\[C\.tag\]\/images\/photo\.webp" align (?P<align>\([0-9., ]+\)) zoom (?P<zoom>0\.[0-9]+)'
+#repl='$+{tabs}imagebutton idle f"characters\/{C\.tag}\/images\/photo.webp" align $+{align}:\r\n$+{tabs}    at transform:\r\n$+{tabs}        zoom 0.13\r\n$+{tabs}    action SetDict(relationships_Entry.friendship, f"{C}", relationships_Entry.friendship[C] + 50)'
+repl='$+{tabs}imagebutton idle f"characters\/{C\.tag}\/images\/photo.webp" align $+{align}:\r\n$+{tabs}    at transform:\r\n$+{tabs}        zoom 0.13\r\n$+{tabs}    action SetField(all_Friendships[create_friendship_key(relationships_Entry, C)], "_score", all_Friendships[create_friendship_key(relationships_Entry, C)]._score + 50)'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
