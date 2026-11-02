@@ -311,17 +311,22 @@ perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 
 #sets player desire values into field values, aka, interactable sliding bars
-patt='value Player.desire range 1\.0'
+#was         value Player.desire range 1\.0
+#now         bar value player_desire range 1.0 anchor (0.5, 0.0) pos (0.94, 0.037) xysize interfaces.sex.bar_size:
+#why? Who the fuck knows? Let's assign a variable to another variable. That makes things cleaner /s
+patt='value player_desire range 1\.0'
 repl='value FieldValue(Player, "desire", range=1.0, step=0.1)'
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 #value Character.desires["orgasm"] range 1.0 
 
 #character desire was redesigned in 0.6b. The bar was split into 2. One at below 1.0 and one at and above 1.0
-patt='value Character.desire range 1\.0'
-repl='value DictValue(Character.desires, "orgasm", range=1.0, step=0.1)'
-perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
+#And these two bars are rejoined in 0.9c.
 
-patt='value Character\.desires\["orgasm"\] range 1\.0'
+#patt='value character_desire range 1\.0'
+#repl='value DictValue(Character.desires, "orgasm", range=1.0, step=0.1)'
+#perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
+
+patt='value desire range 1\.0'
 repl='value DictValue(Character.desires, "orgasm", range=1.0, step=0.1)'
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 echo -e "${BGreen}${fn} patched$NC"
