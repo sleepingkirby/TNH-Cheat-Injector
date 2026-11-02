@@ -187,21 +187,26 @@ perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 #Points will add "studied" or "trained" to player history
 #    text "Points" anchor (0.5, 0.5) pos (0.226, 0.306):
 #        size 26
+# ^^^^^ old ^^^^
 
-patt='    text "Points" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)):[ \r\n]+        size (?P<size>[0-9]+)'
-repl='    textbutton "{size=$+{size}}" + "Points" $+{pos}:\r\n        action Function(Player.History.update, "trained" if skills_leaderboard_type == "combat" else "studied")'
+#    text "Points" anchor (0.5, 0.5) pos (0.226, 0.306) size 26
+
+patt='    text "Points" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)) size (?P<size>[0-9]+)'
+#repl='    textbutton "{size=$+{size}}" + "Points" $+{pos}:\n        action Function(Player.History.update, "trained" if skills_leaderboard_type == "combat" else "studied")'
+repl='    textbutton "{size=$+{size}}" + "Points" $+{pos}:\n        action Function(Player.History.update, "trained" if leaderboard == "combat" else "cognitive")'
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 echo -e "${BGreen}${fn} patched$NC"
 
 
-#=========== ./interfaces/Player_menu/relationships.rpy 
-fn='./interfaces/Player_menu/relationships.rpy'
+#old =========== ./interfaces/Player_menu/relationships.rpy 
+#============ ./interfaces/menu/relationships.rpy'
+fn='./interfaces/menu/relationships.rpy'
 cp $fn $fn.orig
 
 #turns text for both love and trust into textbuttons
-patt='(?P<tabs1> +)text "\[relationships_Entry\.(?P<lt>love|trust)\]"(?P<pos> anchor \([0-9.]+, [0-9.]+\) pos \(0\.[0-9]+, 0\.[0-9]+\)):[ \r\n]+font "(?P<font>[a-zA-Z_]+\.[a-zA-Z]{3,6})"[ \r\n]+size (?P<size>[0-9]+)[ \r\n]+color "[a-z0-9#]+"'
-repl='$+{tabs1}textbutton "{size=$+{size}}{font=$+{font}}" + "[relationships_Entry.$+{lt}]"$+{pos}:\r\n$+{tabs1}    action SetField(relationships_Entry, "$+{lt}", relationships_Entry.$+{lt} + 100)'
+patt='(?P<tabs1> +)text "\[Entry\.(?P<lt>love|trust)\]"(?P<pos> anchor \([0-9.]+, [0-9.]+\) pos \(0\.[0-9]+, 0\.[0-9]+\)):[ \n]+font "(?P<font>[a-zA-Z_]+\.[a-zA-Z]{3,6})"[ \n]+size (?P<size>[0-9]+)[ \n]+color "[a-z0-9#]+"'
+repl='$+{tabs1}textbutton "{size=$+{size}}{font=$+{font}}" + "[Entry.$+{lt}]"$+{pos}:\n$+{tabs1}    action SetField(Entry, "$+{lt}", Entry.$+{lt} + 100)'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
@@ -212,20 +217,31 @@ perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 #
 #perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
+#was (v0.9b) screen relationships_status(status, **properties):
+#now (v0.9c) screen relationships_status(status, anchor = (0.0, 0.0), pos = (0.0, 0.0), text_size = 16, text_color = "#000000"):
+#I swear to god they've hired a dev who charges by the hour or something. Rewriting all this doesn't make the code run faster or any clearer (or, at least, it shouldn't according to all the python evangelists)
+#Either way, I now have to explicitly add the char param in there. This is going to break a fair amount of mods too.
+#screen relationships_status(status, 
+patt='screen relationships_status\(status, '
+repl='screen relationships_status(status, char=None, '
+perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
+
+
+
 #setting the relationships_status() function to insert the text as a text button to turn off mood statuses
-patt='(?P<t1> +)text "\[status.upper\(\)\]" anchor \(0\.5, 0\.5\) pos \(0\.5, 0\.85\):[\r\n]+(?P<t2> +)size properties\.get\("text_size", 16\)(?P<br>[\r\n ]+)color properties\.get\("text_color", "#000000"\)'
-repl='$+{t1}textbutton "{size=[properties.get(\\"text_size\\", 16)]}{color=[properties.get(\\"text_color\\", \\"#000000\\")]}" + "[status.upper()]" anchor (0.5, 0.5) pos (0.5, 0.85):\r\n$+{t2}action SetDict(properties.get("char")._status, status, 0)'
+patt='(?P<t1> +)text "\[status.upper\(\)\]" anchor \(0\.5, 0\.5\) pos \(0\.5, 0\.85\):[\n]+(?P<t2> +)size properties\.get\("text_size", 16\)(?P<br>[\n ]+)color properties\.get\("text_color", "#000000"\)'
+repl='$+{t1}textbutton "{size=[properties.get(\\"text_size\\", 16)]}{color=[properties.get(\\"text_color\\", \\"#000000\\")]}" + "[status.upper()]" anchor (0.5, 0.5) pos (0.5, 0.85):\n$+{t2}action SetDict(properties.get("char")._status, status, 0)'
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 #adding the character into the relationships_status() call
-patt='(?P<t1> {2,})use relationships_status\([\r\n]+(?P<t2> {2,})(?P<status>[a-zA-Z"]+),[\r\n]+'
-repl='$+{t1}use relationships_status(\r\n$+{t2}$+{status},\r\n$+{t2}char = relationships_Entry,\r\n'
+patt='(?P<t1> {2,})use relationships_status\([\n]+(?P<t2> {2,})(?P<status>[a-zA-Z"]+),[\n]+'
+repl='$+{t1}use relationships_status(\n$+{t2}$+{status},\n$+{t2}char = Entry,\n'
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 #adding button that allows for removal of cheating
 #        text "RELATIONSHIP STATUS" anchor (0.0, 0.5) pos (0.495, 0.297):
-patt='        text "RELATIONSHIP STATUS" anchor \(0\.0, 0\.5\) pos \((?P<posX>[0-9.]+), (?P<posY>[0-9.]+)\):[\r\n]+            font "agency_fb\.ttf"[\r\n]+[\r\n]+            size 28'
-repl='        textbutton "{size=28}{font=agency_fb.ttf} RELATIONSHIP STATUS" anchor (0.0, 0.5) pos ($+{posX}, $+{posY}):\r\n            action Function(removeCheating, relationships_Entry)'
+patt='        text "RELATIONSHIP STATUS" anchor \(0\.0, 0\.5\) pos \((?P<posX>[0-9.]+), (?P<posY>[0-9.]+)\):[\n]+            font "agency_fb\.ttf"[\n]+[\n]+            size 28'
+repl='        textbutton "{size=28}{font=agency_fb.ttf} RELATIONSHIP STATUS" anchor (0.0, 0.5) pos ($+{posX}, $+{posY}):\n            action Function(removeCheating, Entry)'
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 
@@ -240,12 +256,36 @@ perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 #also, the friendship system was re-rewritten so that all friendships are put under the all_Frienships global variable
 #Ex. all_Friendships["JeanGrey_Rogue"]._score has the actual score, but also the different levels.
 patt='(?P<tabs> +)add "characters\/\[C\.tag\]\/images\/photo\.webp" align (?P<align>\([0-9., ]+\)) zoom (?P<zoom>0\.[0-9]+)'
-#repl='$+{tabs}imagebutton idle f"characters\/{C\.tag}\/images\/photo.webp" align $+{align}:\r\n$+{tabs}    at transform:\r\n$+{tabs}        zoom 0.13\r\n$+{tabs}    action SetDict(relationships_Entry.friendship, f"{C}", relationships_Entry.friendship[C] + 50)'
-repl='$+{tabs}imagebutton idle f"characters\/{C.tag}\/images\/photo.webp" align $+{align}:\r\n$+{tabs}    at transform:\r\n$+{tabs}        zoom 0.13\r\n$+{tabs}    action SetField(all_Friendships[create_friendship_key(relationships_Entry, C)], "_score", all_Friendships[create_friendship_key(relationships_Entry, C)]._score + 50)'
+#repl='$+{tabs}imagebutton idle f"characters\/{C\.tag}\/images\/photo.webp" align $+{align}:\n$+{tabs}    at transform:\n$+{tabs}        zoom 0.13\n$+{tabs}    action SetDict(relationships_Entry.friendship, f"{C}", relationships_Entry.friendship[C] + 50)'
+repl='$+{tabs}imagebutton idle f"characters\/{C.tag}\/images\/photo.webp" align $+{align}:\n$+{tabs}    at transform:\n$+{tabs}        zoom 0.13\n$+{tabs}    action SetField(all_Friendships[_create_friendship_key(Entry, C)], "_score", all_Friendships[_create_friendship_key(Entry, C)]._score + 50)'
+
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 echo -e "${BGreen}${fn} patched$NC"
+
+#As of v0.9c, they run some of these functions in pure python files. And the functions in these python file daisy chain its imports. Why? Supposed organization (but, you know, that's what classes and libraries are for). It's only good if you know what you're doing. If you don't you can easily start to do circular dependencies. Which there is code in there to run excpetions to prevent instead of, you know, not writing ciruclar dependencies.
+#anyways, now I have to get the code to include _create_friendship_key by modding 2 import files python files so the game has said functionality.
+fn='./core/friendships/__init__.py'
+cp $fn $fn.orig
+
+patt='from \.mechanics import \('
+repl='from .mechanics import (\n    _create_friendship_key,'
+perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
+
+echo -e "${BGreen}${fn} patched$NC"
+
+
+fn='./definitions/core.rpy'
+cp $fn $fn.orig
+
+patt='(?P<tabs> *)from core\.friendships import \('
+repl='$+{tabs}from core\.friendships import \(\n$+{tabs}    _create_friendship_key,'
+
+perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
+echo -e "${BGreen}${fn} patched$NC"
+
+
 
 #=========== ./scripts/interfaces/sex.rpy
 #fn='./scripts/interfaces/sex.rpy'
