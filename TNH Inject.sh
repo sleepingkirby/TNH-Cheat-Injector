@@ -141,20 +141,23 @@ echo -e "${BGreen}${fn} patched$NC"
 #
 #echo -e "${BGreen}${fn} patched$NC"
 
-#=========== ./interfaces/Player_menu/inventory.rpy
-fn='./interfaces/Player_menu/inventory.rpy'
+#old=========== ./interfaces/Player_menu/inventory.rpy
+#===========./interfaces/menu/inventory.rpy
+fn='./interfaces/menu/inventory.rpy'
 cp $fn $fn.orig
 
+#./menu/inventory.rpy:232:    text "$[Player.cash]" anchor (1.0, 0.5) pos (0.9265, 0.905):
 #turns text cash number into textbutton
 patt='    text "\$\[Player\.cash\]" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)):[\r\n]+        size (?P<size>[0-9]+)'
 repl='    textbutton "{size=$+{size}}" + "\$[Player.cash]" $+{pos}:\r\n        action SetVariable("Player.cash", int(Player.cash) + int(50000))'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
+echo -e "${BGreen}${fn} patched$NC"
 
 
-
-#=========== ./interfaces/Player_menu/skills.rpy
-fn='./interfaces/Player_menu/skills.rpy'
+# old =========== ./interfaces/Player_menu/skills.rpy
+#=========== ./interfaces/menu/skills.rpy'
+fn='./interfaces/menu/skills.rpy'
 cp $fn $fn.orig
 
 #turns text for ability points into text button
@@ -442,8 +445,8 @@ fn='./interfaces/main.rpy'
 cp $fn $fn.orig
 
 #writes into main menu that cheat is on
-patt='    text "\[config.version\]" anchor \(1.0, 0.5\) pos \(0.157, 0.96\):\r\n        size 25'
-repl='    text "[config.version]" anchor (1.0, 0.5) pos (0.157, 0.96):\r\n        size 25\r\n    frame:\r\n        xalign .5\r\n        yalign 0\r\n        text("Cheats enabled!")'
+patt='    text "\[config.version\]" anchor \(1.0, 0.5\) pos \(0.157, 0.96\):\n        size 25'
+repl='    text "[config.version]" anchor (1.0, 0.5) pos (0.157, 0.96):\n        size 25\n    frame:\n        xalign .5\n        yalign 0\n        text("Cheats enabled!")'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 echo -e "${BGreen}${fn} patched$NC"
