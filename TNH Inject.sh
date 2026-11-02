@@ -47,7 +47,7 @@ curpath=`pwd`
 
 echo -e "$BGreen Checking if modification has already been done...$NC"
 
-  if [[ -f ./interfaces/main_menu.rpy.orig || -f ./interfaces/phone.rpy.orig ]]
+  if [[ -f ./interfaces/main.rpy.orig || -f ./interfaces/phone.rpy.orig ]]
   then
   echo -e "${BRed}\n\nBackup files found. This probably means it was already patched. No need to further action. Exitting...$NC"
   exit 1
@@ -65,7 +65,7 @@ perlP=`which perl`
   fi
 
 
-  if [[ ! -f ./interfaces/main_menu.rpy ]]
+  if [[ ! -f ./interfaces/main.rpy ]]
   then
   echo -e "${BRed}\n\nFiles to be editted not found. Is it still in the core.rpa?\n\n$NC"
     if [[ -f ./core.rpa && ! -f ./rpatool ]]
@@ -107,13 +107,14 @@ echo -e "${BGreen}${fn} patched$NC"
 #
 #echo -e "${BGreen}${fn} patched$NC"
 
-#=========== ./core/mechanics/utilities.rpy
-fn='./core/mechanics/utilities.rpy'
+#old =========== ./core/mechanics/utilities.rpy
+#=========== ./core/utilities/utilities.rpy
+fn='./core/utilities/utilities.rpy'
 cp $fn $fn.orig
 
 # setup for removing cheating flags
-patt='(?P<tabs> +)def unique\(original:'
-repl='    def removeCheating(C):\r\n        C.remove_trait("cheated_on_flirting")\r\n        C.remove_trait("cheated_on_flirting_in_public")\r\n        C.remove_trait("cheated_on_date")\r\n        C.remove_trait("cheated_on_relationship")\r\n        C.History.remove("cheated_on_flirting")\r\n        C.History.remove("cheated_on_flirting_in_public")\r\n        C.History.remove("cheated_on_date")\r\n        C.History.remove("cheated_on_relationship")\r\n        if "permanent" in C.History.trackers and "cheated_on_flirting_in_public" in C.History.trackers["permanent"]:\r\n            del C.History.trackers["permanent"]["cheated_on_flirting_in_public"]\r\n        if "permanent" in C.History.trackers and "cheated_on_date" in C.History.trackers["permanent"]:\r\n            del C.History.trackers["permanent"]["cheated_on_date"]\r\n        if "permanent" in C.History.trackers and "cheated_on_relationship" in C.History.trackers["permanent"]:\r\n            del C.History.trackers["permanent"]["cheated_on_relationship"]\r\n\r\n        for other_C in GameState.all_Companions:\r\n            if hasattr(other_C, "tag"):\r\n                Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public")\r\n                Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_date")\r\n                Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_relationship")\r\n                if "permanent" in Player.History.trackers and f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public" in Player.History.trackers["permanent"]:\r\n                   del Player.History.permanent[f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public"]\r\n                if "permanent" in Player.History.trackers and f"cheated_on_{C.tag}_with_{other_C.tag}_date" in Player.History.trackers["permanent"]:\r\n                   del Player.History.trackers["permanent"][f"cheated_on_{C.tag}_with_{other_C.tag}_date"]\r\n                if "permanent" in Player.History.trackers and f"cheated_on_{C.tag}_with_{other_C.tag}_relationship" in Player.History.trackers["permanent"]:\r\n                   del Player.History.permanent[f"cheated_on_{C.tag}_with_{other_C.tag}_relationship"]\r\n        return\r\n\r\n$+{tabs}def unique(original:'
+patt='(?P<tabs> *)init -1:'
+repl='init python:\n    def removeCheating(C) -> None:\n        C.remove_trait("cheated_on_flirting")\n        C.remove_trait("cheated_on_flirting_in_public")\n        C.remove_trait("cheated_on_date")\n        C.remove_trait("cheated_on_relationship")\n        C.History.remove("cheated_on_flirting")\n        C.History.remove("cheated_on_flirting_in_public")\n        C.History.remove("cheated_on_date")\n        C.History.remove("cheated_on_relationship")\n        if "permanent" in C.History.trackers and "cheated_on_flirting_in_public" in C.History.trackers["permanent"]:\n            del C.History.trackers["permanent"]["cheated_on_flirting_in_public"]\n        if "permanent" in C.History.trackers and "cheated_on_date" in C.History.trackers["permanent"]:\n            del C.History.trackers["permanent"]["cheated_on_date"]\n        if "permanent" in C.History.trackers and "cheated_on_relationship" in C.History.trackers["permanent"]:\n            del C.History.trackers["permanent"]["cheated_on_relationship"]\n\n        for other_C in GameState.all_Companions:\n            if hasattr(other_C, "tag"):\n                Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public")\n                Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_date")\n                Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_relationship")\n                if "permanent" in Player.History.trackers and f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public" in Player.History.trackers["permanent"]:\n                   del Player.History.permanent[f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public"]\n                if "permanent" in Player.History.trackers and f"cheated_on_{C.tag}_with_{other_C.tag}_date" in Player.History.trackers["permanent"]:\n                   del Player.History.trackers["permanent"][f"cheated_on_{C.tag}_with_{other_C.tag}_date"]\n                if "permanent" in Player.History.trackers and f"cheated_on_{C.tag}_with_{other_C.tag}_relationship" in Player.History.trackers["permanent"]:\n                   del Player.History.permanent[f"cheated_on_{C.tag}_with_{other_C.tag}_relationship"]\n        return\n\n$+{tabs}init -1:'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
@@ -433,10 +434,11 @@ repl='$+{t1}textbutton _("Q.Load") action QuickLoad() text_size quick_text_size\
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 echo -e "${BGreen}${fn} patched$NC"
 
-
 #=========== ./interfaces/main_menu.rpy
 #fn='./scripts/interfaces/main_menu.rpy'
-fn='./interfaces/main_menu.rpy'
+#=========== ./interfaces/main.rpy
+#fn='./scripts/interfaces/main.rpy'
+fn='./interfaces/main.rpy'
 cp $fn $fn.orig
 
 #writes into main menu that cheat is on
