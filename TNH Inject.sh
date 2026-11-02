@@ -331,8 +331,9 @@ repl='value DictValue(Character.desires, "orgasm", range=1.0, step=0.1)'
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 echo -e "${BGreen}${fn} patched$NC"
 
-#=========== ./core/mechanics/approval.rpy
-fn='./core/mechanics/approval.rpy'
+#=========== ./core/characters/approval.py
+# old fn='./core/mechanics/approval.rpy'
+fn='./core/characters/approval.py'
 cp $fn $fn.orig
 
 # This was changed. RonChon has given the game the option to whether or not or not to cap the stats per season.
@@ -347,8 +348,12 @@ cp $fn $fn.orig
 #perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 ##breaks approval limit
-patt='max_stat = max_stats\[season - 1\] if persistent\.stat_caps else 1000'
-repl='max_stat = max_stats[season - 1] if persistent.stat_caps else 99999'
+#patt='max_stat = max_stats\[season - 1\] if persistent\.stat_caps else 1000'
+#repl='max_stat = max_stats[season - 1] if persistent.stat_caps else 99999'
+
+#    max_stat = MAX_STATS[store.season] if store.persistent.stat_caps else MAX_STATS[Season.Summer]
+patt='max_stat = MAX_STATS\[store\.season\] if store\.persistent\.stat_caps else .+'
+repl='max_stat = MAX_STATS[store.season] if store.persistent\.stat_caps else 999999'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 echo -e "${BGreen}${fn} patched$NC"
