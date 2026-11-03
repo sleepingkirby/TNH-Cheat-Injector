@@ -1,5 +1,5 @@
 #!/bin/bash
-v='2.92'
+v='2.93'
 rpaurl='https://raw.githubusercontent.com/Shizmob/rpatool/master/rpatool'
 
 clear
@@ -407,10 +407,21 @@ fn='./interfaces/interactions.rpy'
 cp $fn $fn.orig
 
 patt='if check_approval\(Character, threshold = "hookup"\) and len\(Player\.Location\.Visible\) == 1 and Player\.Location in \{Character\.Room, Player\.Room\} and not Player\.Location\.Shower\.Visible:'
-repl='if check_approval(Character, threshold = "hookup") and len(Player.Location.Visible) == 1 and (Character.check_trait("exhibitionist") or (Player.Location in {Character.Room, Player.Room} and not Player.Location.Shower.Visible)):'
+repl='if check_approval(Character, threshold = "hookup") and (Character.check_trait("exhibitionist") or (len(Player.Location.Visible) == 1 and Player.Location in {Character.Room, Player.Room} and not Player.Location.Shower.Visible)):'
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 echo -e "${BGreen}${fn} patched$NC"
+
+#>>>>>>>>giving another way (the other is via wearing cum 10 or more times) to add the trait exhibitionist
+fn='./core/clothing/interfaces.py'
+cp $fn $fn.orig
+
+patt='(?P<tabs> +)if has_Outfit_changed\(Character\):'
+repl='$+{tabs}if check_approval(Character, threshold = "exhibitionism"):\n$+{tabs}    Character.give_trait("exhibitionist")\n\n$+{tabs}if has_Outfit_changed(Character):'
+perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
+
+echo -e "${BGreen}${fn} patched$NC"
+
 
 
 
