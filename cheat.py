@@ -1,17 +1,18 @@
 import re
 
-v = "2.92"
+v = "2.93"
 tab = " " * 4
 newline = "\n"
 
 #=============  ./interfaces/main_menu.rpy =========
 def main_menu():
-    fn="./interfaces/main_menu.rpy"
+    fn="./interfaces/main.rpy"
     with open(fn, "r") as file:
         fc = file.read()
 
-    patt=r'    text "\[config.version\]" anchor \(1.0, 0.5\) pos \(0.157, 0.96\):[\r\n]+ +size 25'
+    patt=r'    text "\[config.version\]" anchor \(1.0, 0.5\) pos \(0.157, 0.96\):\n        size 25'
     repl=r'    text "[config.version]" anchor (1.0, 0.5) pos (0.157, 0.96):\n        size 25\n    frame:\n        xalign .5\n        yalign 0\n        text("Cheats enabled!")'
+
 
     fc = re.sub(patt, repl, fc, flags=re.M)
 
@@ -28,8 +29,8 @@ def quick_menu():
     with open(fn, "r") as file:
         fc = file.read()
 
-    patt=r'(?P<t1> +)textbutton _\("Q.Load"\) action QuickLoad\(\) text_size quick_text_size'
-    repl=r'\g<t1>textbutton _("Q.Load") action QuickLoad() text_size quick_text_size\n\n\g<t1>textbutton _("CheatV'+v+r'"):\n\g<t1>    action NullAction()'
+    patt=r'(?P<t1> +)textbutton _\("Q.Load"\) action QuickLoad\(\) text_size quick_size'
+    repl=r'\g<t1>textbutton _("Q.Load") action QuickLoad() text_size quick_size\n\n\g<t1>textbutton _("CheatV' + v + r'"):\n\g<t1>    action NullAction()'
 
     fc = re.sub(patt, repl, fc, flags=re.M)
 
@@ -55,13 +56,13 @@ def console():
 
 console()
 
-#=============  ./scripts/mechanics/utilities.rpy =========
+#=========== ./core/utilities/utilities.rpy
 def utilities():
-    fn="./core/mechanics/utilities.rpy"
+    fn="./core/utilities/utilities.rpy"
     with open(fn, "r") as file:
         fc = file.read()
-    patt=r'(?P<tabs> +)def unique\(original:'
-    repl=r'    def removeCheating(C):\r\n        C.remove_trait("cheated_on_flirting")\r\n        C.remove_trait("cheated_on_flirting_in_public")\r\n        C.remove_trait("cheated_on_date")\r\n        C.remove_trait("cheated_on_relationship")\r\n        C.History.remove("cheated_on_flirting")\r\n        C.History.remove("cheated_on_flirting_in_public")\r\n        C.History.remove("cheated_on_date")\r\n        C.History.remove("cheated_on_relationship")\r\n        if "permanent" in C.History.trackers and "cheated_on_flirting_in_public" in C.History.trackers["permanent"]:\r\n            del C.History.trackers["permanent"]["cheated_on_flirting_in_public"]\r\n        if "permanent" in C.History.trackers and "cheated_on_date" in C.History.trackers["permanent"]:\r\n            del C.History.trackers["permanent"]["cheated_on_date"]\r\n        if "permanent" in C.History.trackers and "cheated_on_relationship" in C.History.trackers["permanent"]:\r\n            del C.History.trackers["permanent"]["cheated_on_relationship"]\r\n\r\n        for other_C in GameState.all_Companions:\r\n            if hasattr(other_C, "tag"):\r\n                Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public")\r\n                Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_date")\r\n                Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_relationship")\r\n                if "permanent" in Player.History.trackers and f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public" in Player.History.trackers["permanent"]:\r\n                   del Player.History.permanent[f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public"]\r\n                if "permanent" in Player.History.trackers and f"cheated_on_{C.tag}_with_{other_C.tag}_date" in Player.History.trackers["permanent"]:\r\n                   del Player.History.trackers["permanent"][f"cheated_on_{C.tag}_with_{other_C.tag}_date"]\r\n                if "permanent" in Player.History.trackers and f"cheated_on_{C.tag}_with_{other_C.tag}_relationship" in Player.History.trackers["permanent"]:\r\n                   del Player.History.permanent[f"cheated_on_{C.tag}_with_{other_C.tag}_relationship"]\r\n        return\r\n\r\n\g<tabs>def unique(original:'
+    patt=r'(?P<tabs> *)init -1:'
+    repl=r'init python:\n    def removeCheating(C) -> None:\n        C.remove_trait("cheated_on_flirting")\n        C.remove_trait("cheated_on_flirting_in_public")\n        C.remove_trait("cheated_on_date")\n        C.remove_trait("cheated_on_relationship")\n        C.History.remove("cheated_on_flirting")\n        C.History.remove("cheated_on_flirting_in_public")\n        C.History.remove("cheated_on_date")\n        C.History.remove("cheated_on_relationship")\n        if "permanent" in C.History.trackers and "cheated_on_flirting_in_public" in C.History.trackers["permanent"]:\n            del C.History.trackers["permanent"]["cheated_on_flirting_in_public"]\n        if "permanent" in C.History.trackers and "cheated_on_date" in C.History.trackers["permanent"]:\n            del C.History.trackers["permanent"]["cheated_on_date"]\n        if "permanent" in C.History.trackers and "cheated_on_relationship" in C.History.trackers["permanent"]:\n            del C.History.trackers["permanent"]["cheated_on_relationship"]\n\n        for other_C in GameState.ALL_COMPANIONS:\n            if hasattr(other_C, "tag"):\n                Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public")\n                Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_date")\n                Player.History.remove(f"cheated_on_{C.tag}_with_{other_C.tag}_relationship")\n                if "permanent" in Player.History.trackers and f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public" in Player.History.trackers["permanent"]:\n                   del Player.History.permanent[f"cheated_on_{C.tag}_with_{other_C.tag}_flirting_in_public"]\n                if "permanent" in Player.History.trackers and f"cheated_on_{C.tag}_with_{other_C.tag}_date" in Player.History.trackers["permanent"]:\n                   del Player.History.trackers["permanent"][f"cheated_on_{C.tag}_with_{other_C.tag}_date"]\n                if "permanent" in Player.History.trackers and f"cheated_on_{C.tag}_with_{other_C.tag}_relationship" in Player.History.trackers["permanent"]:\n                   del Player.History.permanent[f"cheated_on_{C.tag}_with_{other_C.tag}_relationship"]\n        return\n\n\g<tabs>init -1:'
 
     fc = re.sub(patt, repl, fc, flags=re.M)
 
@@ -74,7 +75,7 @@ utilities()
 
 #=========== ./interfaces/Player_menu/inventory.rpy =========
 def inventory():
-    fn='./interfaces/Player_menu/inventory.rpy'
+    fn='./interfaces/menu/inventory.rpy'
 
     with open(fn, "r") as file:
         fc = file.read()
@@ -82,6 +83,7 @@ def inventory():
     #turns text cash number into textbutton
     patt=r'    text "\$\[Player\.cash\]" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)):[\r\n]+        size (?P<size>[0-9]+)'
     repl=r'    textbutton "{size=\g<size>}" + "$[Player.cash]" \g<pos>:\r\n        action SetVariable("Player.cash", int(Player.cash) + int(50000))'
+
     fc = re.sub(patt, repl, fc, flags=re.M)
 
     with open(fn, "w") as file: 
@@ -91,16 +93,16 @@ def inventory():
 
 inventory()
 
-#============= ./interfaces/Player_menu/skills.rpy =========
+#============= ./interfaces/menu/skills.rpy =========
 def player_skills():
-    fn='./interfaces/Player_menu/skills.rpy'
+    fn='./interfaces/menu/skills.rpy'
 
     with open(fn, "r") as file:
         fc = file.read()
 
     #turns text for ability points into text button
-    patt=r'    text "\[Player.skill_points\]" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)):[\r\n]+        font "(?P<font>[a-zA-Z_]+\.[a-zA-Z]{3,6})"[ \r\n]+        size (?P<size>[0-9]+)'
-    repl=r'    textbutton "{size=\g<size>}{font=\g<font>}" + "[Player.skill_points]" \g<pos>:\n        action Function(Player.History.update, "bought_skill_point")' 
+    patt=r'    text "\[Player.skill_points\]" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)):[\n]+        font "(?P<font>[a-zA-Z_]+\.[a-zA-Z]{3,6})"[ \n]+        size (?P<size>[0-9]+)'
+    repl=r'    textbutton "{size=\g<size>}{font=\g<font>}" + "[Player.skill_points]" \g<pos>:\n        action Function(Player.History.update, "bought_skill_point")'
     fc = re.sub(patt, repl, fc, flags=re.M)
 
     #allows for draggable player xp bar
@@ -110,13 +112,13 @@ def player_skills():
 
     #allows for draggable player xp bar for level 1
     patt=r'value Player\.XP range Player\.XP_goal'
-    repl=r'value FieldValue(Player, "XP", Player.XP_goal) range (Player.XP_goal)'
+    repl=r'value FieldValue(Player, "XP", Player.XP_goal) range(Player.XP_goal)'
     fc = re.sub(patt, repl, fc, flags=re.M)
 
 
     #Points will add "studied" or "trained" to player history
-    patt=r'    text "Points" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)):[ \r\n]+        size (?P<size>[0-9]+)'
-    repl=r'    textbutton "{size=\g<size>}" + "Points" \g<pos>:\r\n        action Function(Player.History.update, "trained" if skills_leaderboard_type == "combat" else "studied")'
+    patt=r'    text "Points" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)) size (?P<size>[0-9]+)'
+    repl=r'    textbutton "{size=\g<size>}" + "Points" \g<pos>:\n        action Function(Player.History.update, "trained" if leaderboard == "combat" else "cognitive")'
     fc = re.sub(patt, repl, fc, flags=re.M)
 
     with open(fn, "w") as file:
@@ -127,38 +129,39 @@ def player_skills():
 player_skills()
 
 
-#============= ./interfaces/Player_menu/relationships.rpy =========
+#============= ./interfaces/menu/relationships.rpy =========
 def relationships():
-    fn='./interfaces/Player_menu/relationships.rpy'
+    fn='./interfaces/menu/relationships.rpy'
 
     with open(fn, "r") as file:
         fc = file.read()
 
     #turns text for both love and trust into textbuttons
-    patt=r'(?P<tabs1> +)text "\[relationships_Entry\.(?P<lt>love|trust)\]"(?P<pos> anchor \([0-9.]+, [0-9.]+\) pos \(0\.[0-9]+, 0\.[0-9]+\)):[ \r\n]+font "(?P<font>[a-zA-Z_]+\.[a-zA-Z]{3,6})"[ \r\n]+size (?P<size>[0-9]+)[ \r\n]+color "[a-z0-9#]+"'
-    repl=r'\g<tabs1>textbutton "{size=\g<size>}{font=\g<font>}" + "[relationships_Entry.\g<lt>]"\g<pos>:\r\n\g<tabs1>    action SetField(relationships_Entry, "\g<lt>", relationships_Entry.\g<lt> + 100)'
+    patt=r'(?P<tabs1> +)text "\[Entry\.(?P<lt>love|trust)\]"(?P<pos> anchor \([0-9.]+, [0-9.]+\) pos \(0\.[0-9]+, 0\.[0-9]+\)):[ \n]+font "(?P<font>[a-zA-Z_]+\.[a-zA-Z]{3,6})"[ \n]+size (?P<size>[0-9]+)[ \n]+color "[a-z0-9#]+"'
+    repl=r'\g<tabs1>textbutton "{size=\g<size>}{font=\g<font>}" + "[Entry.\g<lt>]"\g<pos>:\n\g<tabs1>    action SetField(Entry, "\g<lt>", Entry.\g<lt> + 100)'
+    fc = re.sub(patt, repl, fc, flags=re.M)
+
+    #adding the character into the relationships_status() call
+    patt=r'screen relationships_status\(status, '
+    repl=r'screen relationships_status(status, char=None, '
     fc = re.sub(patt, repl, fc, flags=re.M)
  
     #setting the relationships_status() function to insert the text as a text button to turn off mood statuses
-    patt=r'(?P<t1> +)text "\[status.upper\(\)\]" anchor \(0\.5, 0\.5\) pos \(0\.5, 0\.85\):[\r\n]+(?P<t2> +)size properties\.get\("text_size", 16\)(?P<br>[\r\n ]+)color properties\.get\("text_color", "#000000"\)'
-    repl=r'\g<t1>textbutton "{size=[properties.get(\\"text_size\\", 16)]}{color=[properties.get(\\"text_color\\", \\"#000000\\")]}" + "[status.upper()]" anchor (0.5, 0.5) pos (0.5, 0.85):\r\n\g<t2>action SetDict(properties.get("char")._status, status, 0)'
+    patt=r'(?P<t1> +)text "\[status.upper\(\)\]" anchor \(0\.5, 0\.5\) pos \(0\.5, 0\.85\):[\n]+(?P<t2> +)size text_size(?P<br>[\n ]+)color text_color'
+    repl=r'\g<t1>textbutton "{size=[text_size]}{color=[text_color]}" + "[status.upper()]" anchor (0.5, 0.5) pos (0.5, 0.85):\n\g<t2>action SetDict(char._status, status, 0)'
     fc = re.sub(patt, repl, fc, flags=re.M)
     
-    #adding the character into the relationships_status() call
-    patt=r'(?P<t1> {2,})use relationships_status\([\r\n]+(?P<t2> {2,})(?P<status>[a-zA-Z"]+),[\r\n]+'
-    repl=r'\g<t1>use relationships_status(\r\n\g<t2>\g<status>,\r\n\g<t2>char = relationships_Entry,\r\n'
-    fc = re.sub(patt, repl, fc, flags=re.M)
-
 
     #adding button that allows for removal of cheating
     #        text "RELATIONSHIP STATUS" anchor (0.0, 0.5) pos (0.495, 0.297):
-    patt=r'        text "RELATIONSHIP STATUS" anchor \(0\.0, 0\.5\) pos \((?P<posX>[0-9.]+), (?P<posY>[0-9.]+)\):[\r\n]+            font "agency_fb\.ttf"[\r\n]+[\r\n]+            size 28'
-    repl=r'        textbutton "{size=28}{font=agency_fb.ttf} RELATIONSHIP STATUS" anchor (0.0, 0.5) pos (\g<posX>, \g<posY>):\r\n            action Function(removeCheating, relationships_Entry)'
+    patt=r'        text "RELATIONSHIP STATUS" anchor \(0\.0, 0\.5\) pos \((?P<posX>[0-9.]+), (?P<posY>[0-9.]+)\):[\n]+            font "agency_fb\.ttf"[\n]+[\n]+            size 28'
+    repl=r'        textbutton "{size=28}{font=agency_fb.ttf} RELATIONSHIP STATUS" anchor (0.0, 0.5) pos (\g<posX>, \g<posY>):\n            action Function(removeCheating, Entry)'
     fc = re.sub(patt, repl, fc, flags=re.M)
 
     #friendship is the best thing ever! (allows for clicking on friendship to increase it by 50)
+
     patt=r'(?P<tabs> +)add "characters/\[C\.tag\]/images/photo\.webp" align (?P<align>\([0-9., ]+\)) zoom (?P<zoom>0\.[0-9]+)'
-    repl=r'\g<tabs>imagebutton idle f"characters/{C.tag}/images/photo.webp" align \g<align>:\r\n\g<tabs>    at transform:\r\n\g<tabs>        zoom 0.13\r\n\g<tabs>    action SetField(all_Friendships[create_friendship_key(relationships_Entry, C)], "_score", all_Friendships[create_friendship_key(relationships_Entry, C)]._score + 50)'
+    repl=r'\g<tabs>imagebutton idle f"characters/{C.tag}/images/photo.webp" align \g<align>:\n\g<tabs>    at transform:\n\g<tabs>        zoom 0.13\n\g<tabs>    action SetField(all_Friendships[_create_friendship_key(Entry, C)], "_score", all_Friendships[_create_friendship_key(Entry, C)]._score + 50)'
     fc = re.sub(patt, repl, fc, flags=re.M)
 
     with open(fn, "w") as file:
@@ -205,7 +208,7 @@ def sex():
 
     print(f"{fn} patched")
 
-sex()
+#sex()
 
 #=========== ./core/mechanics/approval.rpy
 def approval():
@@ -224,7 +227,7 @@ def approval():
 
     print(f"{fn} patched")
 
-approval()
+#approval()
 
 
 ##=========== allowing sex in public. Props to RonChon. 2 Checks in place to prevent this.
@@ -262,7 +265,7 @@ def allowPublicSex():
 
     print(f"{fn} patched")
 
-allowPublicSex()
+#allowPublicSex()
 
 #=========== ./core/mechanics/clothing.rpy
 def allowWearCum():
@@ -302,7 +305,7 @@ def allowWearCum():
   print(f"{fn} patched")
 
 
-allowWearCum()
+#allowWearCum()
 
 
 #=========== ./definitions/player.rpy
@@ -342,7 +345,7 @@ def achievementPoints():
 
 
 
-achievementPoints()
+#achievementPoints()
 
 
 

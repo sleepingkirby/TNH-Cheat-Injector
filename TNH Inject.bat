@@ -22,7 +22,7 @@ set cheat5=ZW4oZm4sICJyIikgYXMgZmlsZToKICAgICAgICBmYyA9IGZpbGUucmVhZCgpCgogICAgc
 REM --------------------------------------------------------------------------------
 REM !! DO NOT EDIT BELOW THIS LINE !!
 REM --------------------------------------------------------------------------------
-set "v=2.92"
+set "v=2.93"
 title TNH Inject v%v%
 :init
 REM --------------------------------------------------------------------------------

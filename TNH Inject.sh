@@ -148,8 +148,8 @@ cp $fn $fn.orig
 
 #./menu/inventory.rpy:232:    text "$[Player.cash]" anchor (1.0, 0.5) pos (0.9265, 0.905):
 #turns text cash number into textbutton
-patt='    text "\$\[Player\.cash\]" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)):[\r\n]+        size (?P<size>[0-9]+)'
-repl='    textbutton "{size=$+{size}}" + "\$[Player.cash]" $+{pos}:\r\n        action SetVariable("Player.cash", int(Player.cash) + int(50000))'
+patt='    text "\$\[Player\.cash\]" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)):[\n]+        size (?P<size>[0-9]+)'
+repl='    textbutton "{size=$+{size}}" + "\$[Player.cash]" $+{pos}:\n        action SetVariable("Player.cash", int(Player.cash) + int(50000))'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 echo -e "${BGreen}${fn} patched$NC"
@@ -166,8 +166,8 @@ cp $fn $fn.orig
 #this also depends on a re-write of the function skill_points in "./scripts/base/player.rpy"
 #additional note: as of 0.8cbeta, this was changed again. Skill points is once again a variable, granted a different variable named self.History.check("bought_skill_point")
 #this means that addAbilityPoints() will probably no longer be needed
-patt='    text "\[Player.skill_points\]" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)):[\r\n]+        font "(?P<font>[a-zA-Z_]+\.[a-zA-Z]{3,6})"[ \r\n]+        size (?P<size>[0-9]+)'
-repl='    textbutton "{size=$+{size}}{font=$+{font}}" + "[Player.skill_points]" $+{pos}:\r\n        action Function(Player.History.update, "bought_skill_point")'
+patt='    text "\[Player.skill_points\]" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)):[\n]+        font "(?P<font>[a-zA-Z_]+\.[a-zA-Z]{3,6})"[ \n]+        size (?P<size>[0-9]+)'
+repl='    textbutton "{size=$+{size}}{font=$+{font}}" + "[Player.skill_points]" $+{pos}:\n        action Function(Player.History.update, "bought_skill_point")'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
@@ -299,8 +299,8 @@ fn='./interfaces/sex.rpy'
 cp $fn $fn.orig
 
 #sets text stamina into textbutton
-patt='        text "\[Player.stamina\]" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)):[ \r\n]+            size (?P<size>[0-9]+)'
-repl='        textbutton "{size=$+{size}}" + "[Player.stamina]" $+{pos}:\r\n            action SetVariable("Player.stamina", Player.max_stamina + Player.stamina)'
+patt='        text "\[Player.stamina\]" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)):[ \n]+            size (?P<size>[0-9]+)'
+repl='        textbutton "{size=$+{size}}" + "[Player.stamina]" $+{pos}:\n            action SetVariable("Player.stamina", Player.max_stamina + Player.stamina)'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
@@ -543,8 +543,8 @@ echo -e "${BGreen}${fn} patched$NC"
 fn='./interfaces/phone/achievements.rpy'
 cp $fn $fn.orig
 
-patt='(?P<t1> +)text "\[Player\.achievement_points\]"(?P<anchor> anchor \([0-9,. ]+\))(?P<pos> pos \([0-9,. ]+\)):[\r\n]+(?P<t2> +)size (?P<size>[0-9]+)[\r\n ]+color "(?P<color>#[0-9A-Fa-f]+)"'
-repl='$+{t1}textbutton "{size=$+{size}}{color=$+{color}}" + "[Player.achievement_points]"$+{anchor}$+{pos}:\r\n$+{t2}action SetVariable("Player.achievePoints", int(Player.achievePoints) + int(500))'
+patt='(?P<t1> +)text "\[Player\.achievement_points\]"(?P<anchor> anchor \([0-9,. ]+\))(?P<pos> pos \([0-9,. ]+\)):[\n]+(?P<t2> +)size (?P<size>[0-9]+)[\n ]+color "(?P<color>#[0-9A-Fa-f]+)"'
+repl='$+{t1}textbutton "{size=$+{size}}{color=$+{color}}" + "[Player.achievement_points]"$+{anchor}$+{pos}:\n$+{t2}action SetVariable("Player.achievePoints", int(Player.achievePoints) + int(500))'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
