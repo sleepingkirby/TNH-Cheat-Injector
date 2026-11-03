@@ -361,31 +361,58 @@ echo -e "${BGreen}${fn} patched$NC"
 #=========== allowing sex in public. Props to RonChon. 2 Checks in place to prevent this.
 # Did I do this because darkstel couldn't get over himself? Yep. Is it a bit immature? Yep. Do I feel ashamed? Nope. If you don't want code to change, don't poke a programmer.
 #=========== ./core/mechanics/sex/request.rpy
-fn='./core/mechanics/sex/request.rpy'
+#fn='./core/mechanics/sex/request.rpy'
+#cp $fn $fn.orig
+#
+##skips bedroom check for place to have sex
+##        elif (Player.location not in Bedrooms and "bg_shower" not in Player.location) or Present - {Character}:
+##        elif (Player.location not in Bedrooms and "Shower" not in Player.location) or get_present_Characters(Player.location) - {Character}:
+#
+#patt='\(Player\.location not in Bedrooms and "Shower" not in Player\.location\) or get_present_Characters\(Player\.location\) - \{Character\}'
+#repl='False'
+#perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
+#
+#echo -e "${BGreen}${fn} patched$NC"
+#
+##fn='./scripts/interfaces/interactions.rpy'
+#fn='./interfaces/interactions.rpy'
+#cp $fn $fn.orig
+#
+##skips bedroom checks and number of people checks for place to have sex GUI
+##                    if check_approval(Character, threshold = "hookup") and len(get_visible_Characters(Player.location)) == 1 and Player.location in {Character.home, Player.home} and not get_visible_Characters(Player.location.replace("Room", "Shower")):
+#patt='if check_approval\(Character, threshold = "hookup"\) and len\(get_visible_Characters\(Player\.location\)\) == 1 and Player\.location in {Character\.home, Player\.home} and not get_visible_Characters\(Player\.location\.replace\("Room", "Shower"\)\):'
+#repl='if check_approval(Character, threshold = "hookup") and len(get_visible_Characters(Player.location)) >= 1:'
+#
+#perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
+#
+#echo -e "${BGreen}${fn} patched$NC"
+
+
+#============= ./core/sex/request.py
+# New public sex logic
+
+#>>>>>>>allow request to go through
+fn='./core/sex/request.py'
 cp $fn $fn.orig
 
-#skips bedroom check for place to have sex
-#        elif (Player.location not in Bedrooms and "bg_shower" not in Player.location) or Present - {Character}:
-#        elif (Player.location not in Bedrooms and "Shower" not in Player.location) or get_present_Characters(Player.location) - {Character}:
+patt='if Location not in store.GameState\.BEDROOMS and not Location\.check_trait\("shower"\)'
+repl='if not Character.check_trait\("exhibitionist"\) and Location not in store.GameState.BEDROOMS and not Location.check_trait("shower")'
 
-patt='\(Player\.location not in Bedrooms and "Shower" not in Player\.location\) or get_present_Characters\(Player\.location\) - \{Character\}'
-repl='False'
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 echo -e "${BGreen}${fn} patched$NC"
 
-#fn='./scripts/interfaces/interactions.rpy'
+#>>>>>>>enable button to show up even in "bad" locations
 fn='./interfaces/interactions.rpy'
 cp $fn $fn.orig
 
-#skips bedroom checks and number of people checks for place to have sex GUI
-#                    if check_approval(Character, threshold = "hookup") and len(get_visible_Characters(Player.location)) == 1 and Player.location in {Character.home, Player.home} and not get_visible_Characters(Player.location.replace("Room", "Shower")):
-patt='if check_approval\(Character, threshold = "hookup"\) and len\(get_visible_Characters\(Player\.location\)\) == 1 and Player\.location in {Character\.home, Player\.home} and not get_visible_Characters\(Player\.location\.replace\("Room", "Shower"\)\):'
-repl='if check_approval(Character, threshold = "hookup") and len(get_visible_Characters(Player.location)) >= 1:'
-
+patt='if check_approval\(Character, threshold = "hookup"\) and len\(Player\.Location\.Visible\) == 1 and Player\.Location in \{Character\.Room, Player\.Room\} and not Player\.Location\.Shower\.Visible:'
+repl='if check_approval(Character, threshold = "hookup") and len(Player.Location.Visible) == 1 and (Character.check_trait("exhibitionist") or (Player.Location in {Character.Room, Player.Room} and not Player.Location.Shower.Visible)):'
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 echo -e "${BGreen}${fn} patched$NC"
+
+
 
 #=========== ./scripts/mechanics/movement.rpy
 # No longer needed as there's a game mechanic to allow the character to wear cum
@@ -419,31 +446,63 @@ echo -e "${BGreen}${fn} patched$NC"
 #    return
 
 
-#=========== ./core/mechanics/clothing.rpy
-#./core/mechanics/clothing.rpy
-fn='./core/mechanics/clothing.rpy'
+
+##=========== ./core/mechanics/clothing.rpy
+##./core/mechanics/clothing.rpy
+#fn='./core/mechanics/clothing.rpy'
+#cp $fn $fn.orig
+## will leave cum on if wore cum 10 or more times
+#patt='if mess:'
+#repl='if C.History.check("wear_cum") < 10 and mess:'
+#
+#perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
+#
+#echo -e "${BGreen}${fn} patched$NC"
+#
+##                    elif C.destination in public_Locations and not C.check_trait("exhibitionist"):
+## this is fixing a bug with the current code for walking around with cum. The clean_cum() function can crash because it's running an interaction when you're in an interaction
+##=========== core/mechanics/behavior.rpy
+#fn='./core/mechanics/behavior.rpy'
+#cp $fn $fn.orig
+## will leave cum on if wore cum 10 or more times
+##/core/locations/wandering.py
+##                    if not C.check_trait("wearing_cum") or (C.Destination in PUBLIC_LOCATIONS and not C.check_trait("exhibitionist")):
+#
+##./core/clothing/behavior.py
+##        if C in ALL_COMPANIONS and any(C.spunk.values()):
+##            if not C.check_trait("wearing_cum"):
+##                clean = True
+##            elif C.Destination in PUBLIC_LOCATIONS and not C.check_trait("exhibitionist"):
+##                clean = True
+##
+##        if clean:
+##            if renpy.showing(f"{C.tag}_sprite") and not instant and not store.black_screen[0]:
+##                clean_cum(C)
+##            else:
+##                C.spunk.clear()
+#
+#
+#patt='elif C\.destination in public_Locations and not C\.check_trait\("exhibitionist"\)'
+#repl='elif C.destination in public_Locations and not C.check_trait("exhibitionist") and False'
+#
+#perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
+#
+#echo -e "${BGreen}${fn} patched$NC"
+
+#"./core/sex/mess.py"
+#    if option == "wear_cum":
+#        Character.give_trait("wearing_cum")
+
+#============= ./core/sex/mess.py new (v0.9c) method of wearing cum
+#if asked to wear cum 10 time or more, will add "exhibitionist trait, which will allow them to keep wearing cum.
+fn='./core/sex/mess.py'
 cp $fn $fn.orig
-# will leave cum on if wore cum 10 or more times
-patt='if mess:'
-repl='if C.History.check("wear_cum") < 10 and mess:'
+patt='Character.give_trait\("wearing_cum"\)'
+repl='Character.give_trait\("wearing_cum"\)\n\n    if Character.History.check("wear_cum") >= 10:\n        Character.give_trait\("exhibitionist"\)'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 echo -e "${BGreen}${fn} patched$NC"
-
-#                    elif C.destination in public_Locations and not C.check_trait("exhibitionist"):
-# this is fixing a bug with the current code for walking around with cum. The clean_cum() function can crash because it's running an interaction when you're in an interaction
-#=========== core/mechanics/behavior.rpy
-fn='./core/mechanics/behavior.rpy'
-cp $fn $fn.orig
-# will leave cum on if wore cum 10 or more times
-patt='elif C\.destination in public_Locations and not C\.check_trait\("exhibitionist"\)'
-repl='elif C.destination in public_Locations and not C.check_trait("exhibitionist") and False'
-
-perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
-
-echo -e "${BGreen}${fn} patched$NC"
-
 
 
 
@@ -454,7 +513,7 @@ cp $fn $fn.orig
 #            self.call_sign: str = self.name
 # Adding achievePoints to achievement_points total
 patt='(?P<tabs> +)self\.call_sign: str = self\.name'
-repl='$+{tabs}self.call_sign: str = self.name\r\n$+{tabs}self.achievePoints = 0'
+repl='$+{tabs}self.call_sign: str = self.name\n$+{tabs}self.achievePoints = 0'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
@@ -487,8 +546,9 @@ cp $fn $fn.orig
 
 #writes into main menu that cheat is on
 #        textbutton _("Q.Load") action QuickLoad() text_size quick_text_size
-patt='(?P<t1> +)textbutton _\("Q.Load"\) action QuickLoad\(\) text_size quick_text_size'
-repl='$+{t1}textbutton _("Q.Load") action QuickLoad() text_size quick_text_size\r\n\r\n$+{t1}textbutton _("CheatV'$v'"):\r\n$+{t1}    action NullAction()'
+#            textbutton _("Q.Load") action QuickLoad() text_size quick_size
+patt='(?P<t1> +)textbutton _\("Q.Load"\) action QuickLoad\(\) text_size quick_size'
+repl='$+{t1}textbutton _("Q.Load") action QuickLoad() text_size quick_size\n\n$+{t1}textbutton _("CheatV'$v'"):\n$+{t1}    action NullAction()'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 echo -e "${BGreen}${fn} patched$NC"
