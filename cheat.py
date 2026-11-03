@@ -213,9 +213,8 @@ def sex():
     fn="./interfaces/sex.rpy"
     with open(fn, "r") as file:
         fc = file.read()
-
     #sets text stamina into textbutton
-    patt=r'        text "\[Player.stamina\]" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)):[ \r\n]+            size (?P<size>[0-9]+)'
+    patt=r'        text "\[Player.stamina\]" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)):[ \n]+            size (?P<size>[0-9]+)'
     repl=r'        textbutton "{size=\g<size>}" + "[Player.stamina]" \g<pos>:\n            action SetVariable("Player.stamina", Player.max_stamina + Player.stamina)'
     fc = re.sub(patt, repl, fc, flags=re.M)
 
@@ -225,16 +224,13 @@ def sex():
     #fc = re.sub(patt, repl, fc, flags=re.M)
 
     #sets player desire values into field values, aka, interactable sliding bars
-    patt=r'value Player.desire range 1\.0'
+    patt=r'value player_desire range 1\.0'
     repl=r'value FieldValue(Player, "desire", range=1.0, step=0.1)'
     fc = re.sub(patt, repl, fc, flags=re.M)
 
     #character desire was redesigned in 0.6b. The bar was split into 2. One at below 1.0 and one at and above 1.0
-    patt=r'value Character.desire range 1\.0'
-    repl=r'value DictValue(Character.desires, "orgasm", range=1.0, step=0.1)'
-    fc = re.sub(patt, repl, fc, flags=re.M)
-    
-    patt=r'value Character\.desires\["orgasm"\] range 1\.0'
+    #And these two bars are rejoined in 0.9c.
+    patt=r'value desire range 1\.0'
     repl=r'value DictValue(Character.desires, "orgasm", range=1.0, step=0.1)'
     fc = re.sub(patt, repl, fc, flags=re.M)
 
@@ -244,17 +240,17 @@ def sex():
 
     print(f"{fn} patched")
 
-#sex()
+sex()
 
 #=========== ./core/mechanics/approval.rpy
 def approval():
-    fn="./core/mechanics/approval.rpy"
+    fn="./core/characters/approval.py"
     with open(fn, "r") as file:
         fc = file.read()
 
     ##breaks approval limit
-    patt=r'max_stat = max_stats\[season - 1\] if persistent\.stat_caps else 1000'
-    repl=r'max_stat = max_stats[season - 1] if persistent.stat_caps else 99999'
+    patt=r'max_stat = MAX_STATS\[store.season\] if store\.persistent\.stat_caps else .+'
+    repl=r'max_stat = MAX_STATS[store.season] if store.persistent.stat_caps else 999999'
 
     fc = re.sub(patt, repl, fc, flags=re.M)
 
@@ -263,13 +259,14 @@ def approval():
 
     print(f"{fn} patched")
 
-#approval()
+approval()
 
 
 ##=========== allowing sex in public. Props to RonChon. 2 Checks in place to prevent this.
 ## Did I do this because darkstel couldn't get over himself? Yep. Is it a bit immature? Yep. Do I feel ashamed? Nope. If you don't want code to change, don't poke a programmer.
 ##=========== ./scripts/sex/request.rpy
 #=========== ./core/mechanics/sex/request.rpy
+#=========== ./core/sex/request.py'
 def allowPublicSex():
     fn="./core/mechanics/sex/request.rpy"
     with open(fn, "r") as file:

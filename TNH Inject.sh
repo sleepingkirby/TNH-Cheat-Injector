@@ -352,7 +352,7 @@ cp $fn $fn.orig
 #repl='max_stat = max_stats[season - 1] if persistent.stat_caps else 99999'
 
 #    max_stat = MAX_STATS[store.season] if store.persistent.stat_caps else MAX_STATS[Season.Summer]
-patt='max_stat = MAX_STATS\[store\.season\] if store\.persistent\.stat_caps else .+'
+patt='max_stat = MAX_STATS\[store.season\] if store\.persistent\.stat_caps else .+'
 repl='max_stat = MAX_STATS[store.season] if store.persistent\.stat_caps else 999999'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
