@@ -268,13 +268,13 @@ approval()
 #=========== ./core/mechanics/sex/request.rpy
 #=========== ./core/sex/request.py'
 def allowPublicSex():
-    fn="./core/mechanics/sex/request.rpy"
+    fn="./core/sex/request.py"
     with open(fn, "r") as file:
         fc = file.read()
 
-    #skips bedroom check for place to have sex
-    patt=r'\(Player\.location not in Bedrooms and "Shower" not in Player\.location\) or get_present_Characters\(Player\.location\) - \{Character\}'
-    repl=r'False'
+    #>>>>>>>allow request to go through
+    patt=r'if Location not in store.GameState\.BEDROOMS and not Location\.check_trait\("shower"\)'
+    repl=r'if not Character.check_trait("exhibitionist") and Location not in store.GameState.BEDROOMS and not Location.check_trait("shower")'
     fc = re.sub(patt, repl, fc, flags=re.M)
 
     with open(fn, "w") as file:
@@ -283,14 +283,13 @@ def allowPublicSex():
     print(f"{fn} patched")
 
 
+    #>>>>>>>enable button to show up even in "bad" locations
     fn="./interfaces/interactions.rpy"
     with open(fn, "r") as file:
         fc = file.read()
 
-    #skips bedroom checks and number of people checks for place to have sex GUI
-    patt=r'if check_approval\(Character, threshold = "hookup"\) and len\(get_visible_Characters\(Player\.location\)\) == 1 and Player\.location in {Character\.home, Player\.home} and not get_visible_Characters\(Player\.location\.replace\("Room", "Shower"\)\):'
-    repl=r'if check_approval(Character, threshold = "hookup") and len(get_visible_Characters(Player.location)) >= 1:'
-
+    patt=r'if check_approval\(Character, threshold = "hookup"\) and len\(Player\.Location\.Visible\) == 1 and Player\.Location in \{Character\.Room, Player\.Room\} and not Player\.Location\.Shower\.Visible:'
+    repl=r'if check_approval(Character, threshold = "hookup") and (Character.check_trait("exhibitionist") or (len(Player.Location.Visible) == 1 and Player.Location in {Character.Room, Player.Room} and not Player.Location.Shower.Visible)):'
     fc = re.sub(patt, repl, fc, flags=re.M)
 
     with open(fn, "w") as file:
@@ -298,38 +297,51 @@ def allowPublicSex():
 
     print(f"{fn} patched")
 
-#allowPublicSex()
+
+    #>>>>>>>>giving another way (the other is via wearing cum 10 or more times) to add the trait exhibitionist
+    fn="./core/clothing/interfaces.py"
+    with open(fn, "r") as file:
+        fc = file.read()
+
+    patt=r'(?P<tabs> +)if has_Outfit_changed\(Character\):'
+    repl=r'\g<tabs>if check_approval(Character, threshold = "exhibitionism"):\n\g<tabs>    Character.give_trait("exhibitionist")\n\n\g<tabs>if has_Outfit_changed(Character):'
+    fc = re.sub(patt, repl, fc, flags=re.M)
+
+    with open(fn, "w") as file:
+        file.write(fc)
+
+    print(f"{fn} patched")
+
+
+allowPublicSex()
 
 #=========== ./core/mechanics/clothing.rpy
 def allowWearCum():
 #./core/mechanics/clothing.rpy
-  fn='./core/mechanics/clothing.rpy'
+  fn='./core/sex/mess.py'
+
   with open(fn, "r") as file:
       fc = file.read()
 
-  # will leave cum on if wore cum 10 or more times
+  #if wore cum 10 times, add the exhibitionist trait, which makes the LI okay with wearing cum
+  patt=r'Character\.give_trait\("wearing_cum"\)'
+  repl=r'Character.give_trait("wearing_cum")\n\n    if Character.History.check("wear_cum") >= 10:\n        Character.give_trait("exhibitionist")'
+  fc = re.sub(patt, repl, fc, flags=re.M)
+
+  with open(fn, "w") as file:
+      file.write(fc)
+
+  print(f"{fn} patched")
+
+
+  #skips the clean cum logic in changing clothes, while in a party, for moving to different locations
+  fn='./core/clothing/appropriateness.py'
+
+  with open(fn, "r") as file:
+      fc = file.read()
+
   patt=r'if mess:'
-  repl=r'if C.History.check("wear_cum") < 10 and mess:'
-
-  fc = re.sub(patt, repl, fc, flags=re.M)
-
-  with open(fn, "w") as file:
-      file.write(fc)
-
-  print(f"{fn} patched")
-
-  
-  #                    elif C.destination in public_Locations and not C.check_trait("exhibitionist"):
-  # this is fixing a bug with the current code for walking around with cum. The clean_cum() function can crash because it's running an interaction when you're in an interaction
-  #=========== core/mechanics/behavior.rpy
-  fn='./core/mechanics/behavior.rpy'
-  with open(fn, "r") as file:
-      fc = file.read()
-
-  # will leave cum on if wore cum 10 or more times
-  patt=r'elif C\.destination in public_Locations and not C\.check_trait\("exhibitionist"\)'
-  repl=r'elif C.destination in public_Locations and not C.check_trait("exhibitionist") and False'
-  
+  repl=r'if not C.check_trait("exhibitionist") and mess:'
   fc = re.sub(patt, repl, fc, flags=re.M)
 
   with open(fn, "w") as file:
@@ -338,7 +350,7 @@ def allowWearCum():
   print(f"{fn} patched")
 
 
-#allowWearCum()
+allowWearCum()
 
 
 #=========== ./definitions/player.rpy
@@ -348,8 +360,7 @@ def achievementPoints():
         fc = file.read()
 
     patt=r'(?P<tabs> +)self\.call_sign: str = self\.name'
-    repl=r'\g<tabs>self.call_sign: str = self.name\r\n\g<tabs>self.achievePoints = 0'
-
+    repl=r'\g<tabs>self.call_sign: str = self.name\n\g<tabs>self.achievePoints = 0'
     fc = re.sub(patt, repl, fc, flags=re.M)
 
     patt=r'(?P<tabs> +)points = 0'
@@ -366,8 +377,8 @@ def achievementPoints():
     with open(fn, "r") as file:
         fc = file.read()
 
-    patt=r'(?P<t1> +)text "\[Player\.achievement_points\]"(?P<anchor> anchor \([0-9,. ]+\))(?P<pos> pos \([0-9,. ]+\)):[\r\n]+(?P<t2> +)size (?P<size>[0-9]+)[\r\n ]+color "(?P<color>#[0-9A-Fa-f]+)"'
-    repl=r'\g<t1>textbutton "{size=\g<size>}{color=\g<color>}" + "[Player.achievement_points]"\g<anchor>\g<pos>:\r\n\g<t2>action SetVariable("Player.achievePoints", int(Player.achievePoints) + int(500))'
+    patt=r'(?P<t1> +)text "\[Player\.achievement_points\]"(?P<anchor> anchor \([0-9,. ]+\))(?P<pos> pos \([0-9,. ]+\)):[\n]+(?P<t2> +)size (?P<size>[0-9]+)[\n ]+color "(?P<color>#[0-9A-Fa-f]+)"'
+    repl=r'\g<t1>textbutton "{size=\g<size>}{color=\g<color>}" + "[Player.achievement_points]"\g<anchor>\g<pos>:\n\g<t2>action SetVariable("Player.achievePoints", int(Player.achievePoints) + int(500))'
 
     fc = re.sub(patt, repl, fc, flags=re.M)
 
@@ -378,7 +389,7 @@ def achievementPoints():
 
 
 
-#achievementPoints()
+achievementPoints()
 
 
 

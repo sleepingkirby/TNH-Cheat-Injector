@@ -396,7 +396,7 @@ fn='./core/sex/request.py'
 cp $fn $fn.orig
 
 patt='if Location not in store.GameState\.BEDROOMS and not Location\.check_trait\("shower"\)'
-repl='if not Character.check_trait\("exhibitionist"\) and Location not in store.GameState.BEDROOMS and not Location.check_trait("shower")'
+repl='if not Character.check_trait("exhibitionist") and Location not in store.GameState.BEDROOMS and not Location.check_trait("shower")'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
@@ -508,8 +508,20 @@ echo -e "${BGreen}${fn} patched$NC"
 #if asked to wear cum 10 time or more, will add "exhibitionist trait, which will allow them to keep wearing cum.
 fn='./core/sex/mess.py'
 cp $fn $fn.orig
-patt='Character.give_trait\("wearing_cum"\)'
-repl='Character.give_trait\("wearing_cum"\)\n\n    if Character.History.check("wear_cum") >= 10:\n        Character.give_trait\("exhibitionist"\)'
+patt='Character\.give_trait\("wearing_cum"\)'
+repl='Character.give_trait("wearing_cum")\n\n    if Character.History.check("wear_cum") >= 10:\n        Character.give_trait("exhibitionist")'
+
+perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
+
+echo -e "${BGreen}${fn} patched$NC"
+
+
+#thought they unified this finally. Guess not. Guess all that abstraction didn't even prevent copy/past coding
+#skips the clean cum logic in changing clothes, while in a party, for moving to different locations
+fn='./core/clothing/appropriateness.py'
+cp $fn $fn.orig
+patt='if mess:'
+repl='if not C.check_trait("exhibitionist") and mess:'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
