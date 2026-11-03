@@ -286,7 +286,7 @@ fn='./definitions/core.rpy'
 cp $fn $fn.orig
 
 patt='(?P<tabs> *)from core\.friendships import \('
-repl='$+{tabs}from core\.friendships import \(\n$+{tabs}    _create_friendship_key,'
+repl='$+{tabs}from core.friendships import (\n$+{tabs}    _create_friendship_key,'
 
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 echo -e "${BGreen}${fn} patched$NC"

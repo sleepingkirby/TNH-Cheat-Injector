@@ -145,6 +145,11 @@ def relationships():
     patt=r'screen relationships_status\(status, '
     repl=r'screen relationships_status(status, char=None, '
     fc = re.sub(patt, repl, fc, flags=re.M)
+
+    #fixing calls to relationships_status() to include the character as a parameter
+    patt=r'(?P<t1> {2,})use relationships_status\([\n]+(?P<t2> {2,})(?P<status>[a-zA-Z"]+),[\n]+'
+    repl=r'\g<t1>use relationships_status(\n\g<t2>\g<status>,\n\g<t2>char = Entry,\n'
+    fc = re.sub(patt, repl, fc, flags=re.M)
  
     #setting the relationships_status() function to insert the text as a text button to turn off mood statuses
     patt=r'(?P<t1> +)text "\[status.upper\(\)\]" anchor \(0\.5, 0\.5\) pos \(0\.5, 0\.85\):[\n]+(?P<t2> +)size text_size(?P<br>[\n ]+)color text_color'
@@ -159,7 +164,6 @@ def relationships():
     fc = re.sub(patt, repl, fc, flags=re.M)
 
     #friendship is the best thing ever! (allows for clicking on friendship to increase it by 50)
-
     patt=r'(?P<tabs> +)add "characters/\[C\.tag\]/images/photo\.webp" align (?P<align>\([0-9., ]+\)) zoom (?P<zoom>0\.[0-9]+)'
     repl=r'\g<tabs>imagebutton idle f"characters/{C.tag}/images/photo.webp" align \g<align>:\n\g<tabs>    at transform:\n\g<tabs>        zoom 0.13\n\g<tabs>    action SetField(all_Friendships[_create_friendship_key(Entry, C)], "_score", all_Friendships[_create_friendship_key(Entry, C)]._score + 50)'
     fc = re.sub(patt, repl, fc, flags=re.M)
@@ -169,7 +173,39 @@ def relationships():
 
     print(f"{fn} patched")
 
+
+
+#==== inserting _create_friendship_key() from python into renpy
+    fn='./core/friendships/__init__.py'
+    with open(fn, "r") as file:
+        fc = file.read()
+
+    patt=r'from \.mechanics import \('
+    repl=r'from .mechanics import (\n    _create_friendship_key,'
+    fc = re.sub(patt, repl, fc, flags=re.M)
+
+    with open(fn, "w") as file:
+        file.write(fc)
+
+    print(f"{fn} patched")
+
+
+    fn='./definitions/core.rpy'
+    with open(fn, "r") as file:
+        fc = file.read()
+
+    patt=r'(?P<tabs> *)from core\.friendships import \('
+    repl=r'\g<tabs>from core.friendships import (\n\g<tabs>    _create_friendship_key,'
+    fc = re.sub(patt, repl, fc, flags=re.M)
+
+    with open(fn, "w") as file:
+        file.write(fc)
+
+    print(f"{fn} patched")
+
+
 relationships()
+
 
 
 #=============  ./interfaces/sex.rpy =========
