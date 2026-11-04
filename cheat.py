@@ -118,7 +118,7 @@ def player_skills():
 
     #Points will add "studied" or "trained" to player history
     patt=r'    text "Points" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)) size (?P<size>[0-9]+)'
-    repl=r'    textbutton "{size=\g<size>}" + "Points" \g<pos>:\n        action Function(Player.History.update, "trained" if leaderboard == "combat" else "cognitive")'
+    repl=r'    textbutton "{size=\g<size>}" + "Points" \g<pos>:\n        action Function(Player.History.update, "trained" if leaderboard == "combat" else "studied")'
     fc = re.sub(patt, repl, fc, flags=re.M)
 
     with open(fn, "w") as file:

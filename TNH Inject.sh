@@ -193,7 +193,7 @@ perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 patt='    text "Points" (?P<pos>anchor \([0-9.]+, [0-9.]+\) pos \([0-9.]+, [0-9.]+\)) size (?P<size>[0-9]+)'
 #repl='    textbutton "{size=$+{size}}" + "Points" $+{pos}:\n        action Function(Player.History.update, "trained" if skills_leaderboard_type == "combat" else "studied")'
-repl='    textbutton "{size=$+{size}}" + "Points" $+{pos}:\n        action Function(Player.History.update, "trained" if leaderboard == "combat" else "cognitive")'
+repl='    textbutton "{size=$+{size}}" + "Points" $+{pos}:\n        action Function(Player.History.update, "trained" if leaderboard == "combat" else "studied")'
 perl -0777 -i -pe 's/'"$patt"'/'"$repl"'/mg' $fn
 
 echo -e "${BGreen}${fn} patched$NC"
